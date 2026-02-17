@@ -8,8 +8,18 @@ interface DepthFilterProps {
 
 export function DepthFilter({ depthLevel, onSelect }: DepthFilterProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-3 w-64">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+    <div
+      className="rounded-lg p-3 w-64 border"
+      style={{
+        background: 'var(--color-surface-primary)',
+        borderColor: 'var(--color-border-primary)',
+        boxShadow: 'var(--shadow-panel)',
+      }}
+    >
+      <h3
+        className="text-xs font-semibold uppercase tracking-wider mb-2"
+        style={{ color: 'var(--color-content-tertiary)' }}
+      >
         Depth
       </h3>
       <div className="flex gap-1">
@@ -17,11 +27,12 @@ export function DepthFilter({ depthLevel, onSelect }: DepthFilterProps) {
           <button
             key={level}
             onClick={() => onSelect(level)}
-            className={`flex-1 text-xs py-1.5 px-2 rounded font-medium transition-colors cursor-pointer ${
+            className="flex-1 text-xs py-1.5 px-2 rounded font-medium transition-colors cursor-pointer"
+            style={
               depthLevel === level
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+                ? { background: 'var(--color-interactive-primary)', color: 'var(--color-content-inverse)' }
+                : { background: 'var(--color-surface-secondary)', color: 'var(--color-content-secondary)' }
+            }
           >
             {label}
           </button>

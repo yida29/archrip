@@ -118,7 +118,7 @@ export async function loadArchitecture(): Promise<LoadedArchitecture> {
     source: e.source,
     target: e.target,
     label: e.label ?? undefined,
-    style: { stroke: '#94a3b8', strokeWidth: 1.5 },
+    style: { stroke: 'var(--color-edge-stroke)', strokeWidth: 1.5 },
     type: 'smoothstep',
   }));
 

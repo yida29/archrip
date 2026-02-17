@@ -11,9 +11,22 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
   const colors = getCategoryColors(data.category);
 
   return (
-    <div className="fixed top-0 right-0 h-full w-[400px] bg-white shadow-xl z-50 overflow-y-auto border-l border-gray-200">
+    <div
+      className="fixed top-0 right-0 h-full w-[400px] z-50 overflow-y-auto border-l"
+      style={{
+        background: 'var(--color-surface-primary)',
+        borderColor: 'var(--color-border-primary)',
+        boxShadow: 'var(--shadow-panel)',
+      }}
+    >
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-start justify-between">
+      <div
+        className="sticky top-0 border-b p-4 flex items-start justify-between"
+        style={{
+          background: 'var(--color-surface-primary)',
+          borderColor: 'var(--color-border-primary)',
+        }}
+      >
         <div>
           <span
             className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full mb-2"
@@ -21,11 +34,12 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
           >
             {getCategoryLabel(data.category)}
           </span>
-          <h2 className="text-lg font-bold text-gray-900">{data.label}</h2>
+          <h2 className="text-lg font-bold" style={{ color: 'var(--color-content-primary)' }}>{data.label}</h2>
         </div>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1"
+          className="text-xl leading-none p-1 cursor-pointer transition-colors"
+          style={{ color: 'var(--color-content-tertiary)' }}
           aria-label="Close"
         >
           &times;
@@ -36,7 +50,7 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
         {/* Description */}
         {data.description && (
           <Section title="Description">
-            <p className="text-gray-700">{data.description}</p>
+            <p style={{ color: 'var(--color-content-secondary)' }}>{data.description}</p>
           </Section>
         )}
 
@@ -48,12 +62,16 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
                 href={data.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline break-all"
+                className="underline break-all"
+                style={{ color: 'var(--color-interactive-primary)' }}
               >
                 {data.filePath}
               </a>
             ) : (
-              <code className="text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded text-xs break-all">
+              <code
+                className="px-1.5 py-0.5 rounded text-xs break-all"
+                style={{ color: 'var(--color-content-secondary)', background: 'var(--color-surface-secondary)' }}
+              >
                 {data.filePath}
               </code>
             )}
@@ -63,7 +81,10 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
         {/* Implements */}
         {data.implements && (
           <Section title="Implements">
-            <code className="text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded text-xs">
+            <code
+              className="px-1.5 py-0.5 rounded text-xs"
+              style={{ color: 'var(--cat-port-text)', background: 'var(--cat-port-bg)' }}
+            >
               {data.implements}
             </code>
           </Section>
@@ -72,7 +93,7 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
         {/* External Service */}
         {data.externalService && (
           <Section title="External Service">
-            <span className="text-gray-600">{data.externalService}</span>
+            <span style={{ color: 'var(--color-content-secondary)' }}>{data.externalService}</span>
           </Section>
         )}
 
@@ -88,7 +109,7 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
                     <span className={`inline-block w-14 font-bold ${methodColor(method ?? '')}`}>
                       {method}
                     </span>
-                    <span className="text-gray-600">{path}</span>
+                    <span style={{ color: 'var(--color-content-secondary)' }}>{path}</span>
                   </div>
                 );
               })}
@@ -101,7 +122,11 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
           <Section title="Methods">
             <div className="flex flex-wrap gap-1.5">
               {data.methods.map((m) => (
-                <code key={m} className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">
+                <code
+                  key={m}
+                  className="px-1.5 py-0.5 rounded text-xs"
+                  style={{ background: 'var(--color-surface-secondary)', color: 'var(--color-content-secondary)' }}
+                >
                   {m}()
                 </code>
               ))}
@@ -115,27 +140,27 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
             <div className="overflow-x-auto">
               <table className="w-full text-xs border-collapse">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="text-left p-1.5 border-b border-gray-200 font-semibold">Column</th>
-                    <th className="text-left p-1.5 border-b border-gray-200 font-semibold">Type</th>
-                    <th className="text-left p-1.5 border-b border-gray-200 font-semibold">Null</th>
-                    <th className="text-left p-1.5 border-b border-gray-200 font-semibold">Key</th>
+                  <tr style={{ background: 'var(--color-surface-secondary)' }}>
+                    <th className="text-left p-1.5 font-semibold" style={{ borderBottom: '1px solid var(--color-border-primary)' }}>Column</th>
+                    <th className="text-left p-1.5 font-semibold" style={{ borderBottom: '1px solid var(--color-border-primary)' }}>Type</th>
+                    <th className="text-left p-1.5 font-semibold" style={{ borderBottom: '1px solid var(--color-border-primary)' }}>Null</th>
+                    <th className="text-left p-1.5 font-semibold" style={{ borderBottom: '1px solid var(--color-border-primary)' }}>Key</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.schema.columns.map((col) => (
-                    <tr key={col.name} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="p-1.5 font-mono text-gray-900">
+                    <tr key={col.name} style={{ borderBottom: '1px solid var(--color-border-primary)' }}>
+                      <td className="p-1.5 font-mono" style={{ color: 'var(--color-content-primary)' }}>
                         {col.name}
                         {col.foreignKey && (
-                          <span className="text-blue-500 ml-1" title={`FK: ${col.foreignKey.table}.${col.foreignKey.column}${col.foreignKey.onDelete ? ` (${col.foreignKey.onDelete})` : ''}`}>
+                          <span className="ml-1" style={{ color: 'var(--color-interactive-primary)' }} title={`FK: ${col.foreignKey.table}.${col.foreignKey.column}${col.foreignKey.onDelete ? ` (${col.foreignKey.onDelete})` : ''}`}>
                             FK
                           </span>
                         )}
                       </td>
-                      <td className="p-1.5 text-gray-600">{col.type}</td>
-                      <td className="p-1.5">{col.nullable ? <span className="text-yellow-600">YES</span> : '-'}</td>
-                      <td className="p-1.5 text-gray-500">{col.index ?? '-'}</td>
+                      <td className="p-1.5" style={{ color: 'var(--color-content-secondary)' }}>{col.type}</td>
+                      <td className="p-1.5">{col.nullable ? <span className="text-yellow-600 dark:text-yellow-400">YES</span> : '-'}</td>
+                      <td className="p-1.5" style={{ color: 'var(--color-content-tertiary)' }}>{col.index ?? '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -145,10 +170,14 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
             {/* Enum Values */}
             {data.schema.enumValues && Object.entries(data.schema.enumValues).map(([field, values]) => (
               <div key={field} className="mt-2">
-                <div className="text-xs font-semibold text-gray-600 mb-1">{field} values:</div>
+                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-content-secondary)' }}>{field} values:</div>
                 <div className="flex flex-wrap gap-1">
                   {Object.entries(values).map(([k, v]) => (
-                    <span key={k} className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-xs">
+                    <span
+                      key={k}
+                      className="px-1.5 py-0.5 rounded text-xs"
+                      style={{ background: 'var(--cat-controller-bg)', color: 'var(--cat-controller-text)' }}
+                    >
                       {k}={v}
                     </span>
                   ))}
@@ -159,8 +188,8 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
             {/* Indexes */}
             {data.schema.indexes && data.schema.indexes.length > 0 && (
               <div className="mt-2">
-                <div className="text-xs font-semibold text-gray-600 mb-1">Indexes:</div>
-                <ul className="text-xs text-gray-600 space-y-0.5">
+                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-content-secondary)' }}>Indexes:</div>
+                <ul className="text-xs space-y-0.5" style={{ color: 'var(--color-content-secondary)' }}>
                   {data.schema.indexes.map((idx) => (
                     <li key={idx} className="font-mono">{idx}</li>
                   ))}
@@ -189,7 +218,12 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
                 <button
                   key={ucId}
                   onClick={() => onUseCaseClick(ucId)}
-                  className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs hover:bg-indigo-100 transition-colors cursor-pointer border border-indigo-200"
+                  className="px-2 py-1 rounded text-xs transition-colors cursor-pointer border"
+                  style={{
+                    background: 'var(--color-surface-secondary)',
+                    color: 'var(--color-interactive-primary)',
+                    borderColor: 'var(--color-border-primary)',
+                  }}
                 >
                   {ucId}
                 </button>
@@ -205,7 +239,7 @@ export function DetailPanel({ data, onClose, onUseCaseClick }: DetailPanelProps)
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">{title}</h3>
+      <h3 className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-content-tertiary)' }}>{title}</h3>
       {children}
     </div>
   );
@@ -213,11 +247,11 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function methodColor(method: string): string {
   switch (method) {
-    case 'GET': return 'text-green-600';
-    case 'POST': return 'text-blue-600';
-    case 'PUT': return 'text-yellow-600';
-    case 'PATCH': return 'text-orange-600';
-    case 'DELETE': return 'text-red-600';
-    default: return 'text-gray-600';
+    case 'GET': return 'text-green-600 dark:text-green-400';
+    case 'POST': return 'text-blue-600 dark:text-blue-400';
+    case 'PUT': return 'text-yellow-600 dark:text-yellow-400';
+    case 'PATCH': return 'text-orange-600 dark:text-orange-400';
+    case 'DELETE': return 'text-red-600 dark:text-red-400';
+    default: return '';
   }
 }

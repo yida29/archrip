@@ -52,8 +52,15 @@ function getMeta(category: string): CategoryMeta {
   return CATEGORY_META[category as StandardCategory] ?? FALLBACK_META;
 }
 
+const STANDARD_CATEGORIES = ['controller', 'service', 'port', 'adapter', 'model', 'external', 'job', 'dto'] as const;
+
 export function getCategoryColors(category: string): CategoryStyle {
-  return getMeta(category).color;
+  const key = (STANDARD_CATEGORIES as readonly string[]).includes(category) ? category : 'fallback';
+  return {
+    bg: `var(--cat-${key}-bg)`,
+    border: `var(--cat-${key}-border)`,
+    text: `var(--cat-${key}-text)`,
+  };
 }
 
 export function getCategoryLabel(category: string): string {

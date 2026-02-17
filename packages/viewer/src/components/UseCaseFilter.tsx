@@ -8,14 +8,30 @@ interface UseCaseFilterProps {
 
 export function UseCaseFilter({ useCases, selectedUseCase, onSelect }: UseCaseFilterProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-3 w-64">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+    <div
+      className="rounded-lg p-3 w-64 border"
+      style={{
+        background: 'var(--color-surface-primary)',
+        borderColor: 'var(--color-border-primary)',
+        boxShadow: 'var(--shadow-panel)',
+      }}
+    >
+      <h3
+        className="text-xs font-semibold uppercase tracking-wider mb-2"
+        style={{ color: 'var(--color-content-tertiary)' }}
+      >
         Use Case Filter
       </h3>
       <select
         value={selectedUseCase ?? ''}
         onChange={(e) => onSelect(e.target.value || null)}
-        className="w-full text-sm border border-gray-300 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+        className="w-full text-sm rounded px-2 py-1.5 focus:outline-none focus:ring-2 border"
+        style={{
+          background: 'var(--color-surface-primary)',
+          borderColor: 'var(--color-border-secondary)',
+          color: 'var(--color-content-primary)',
+          '--tw-ring-color': 'var(--color-border-focus)',
+        } as React.CSSProperties}
       >
         <option value="">Show All</option>
         {useCases.map((uc) => (
@@ -26,12 +42,13 @@ export function UseCaseFilter({ useCases, selectedUseCase, onSelect }: UseCaseFi
       </select>
       {selectedUseCase && (
         <div className="mt-2">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs" style={{ color: 'var(--color-content-secondary)' }}>
             {useCases.find((uc) => uc.id === selectedUseCase)?.description}
           </p>
           <button
             onClick={() => onSelect(null)}
-            className="mt-1.5 text-xs text-blue-600 hover:text-blue-800 cursor-pointer"
+            className="mt-1.5 text-xs cursor-pointer hover:underline"
+            style={{ color: 'var(--color-interactive-primary)' }}
           >
             Clear filter
           </button>

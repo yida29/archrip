@@ -14,13 +14,13 @@ export function ArchNode({ data, selected }: NodeProps<ArchFlowNode>) {
       <div
         style={{
           background: colors.bg,
-          border: `2px solid ${selected ? '#2563eb' : colors.border}`,
+          border: `2px solid ${selected ? 'var(--color-border-focus)' : colors.border}`,
           borderRadius: 8,
           padding: '8px 12px',
           minWidth: 140,
           maxWidth: 200,
           cursor: 'pointer',
-          boxShadow: selected ? '0 0 0 2px #2563eb40' : '0 1px 3px rgba(0,0,0,0.1)',
+          boxShadow: selected ? 'var(--shadow-node-selected)' : 'var(--shadow-node)',
           transition: 'box-shadow 0.15s, border-color 0.15s',
         }}
       >

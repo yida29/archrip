@@ -1,5 +1,124 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (instead of media query) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Design Tokens (Light) ─── */
+:root {
+  /* Surface */
+  --color-surface-canvas: #f8fafc;
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #f1f5f9;
+  --color-surface-tertiary: #e2e8f0;
+
+  /* Content */
+  --color-content-primary: #0f172a;
+  --color-content-secondary: #475569;
+  --color-content-tertiary: #94a3b8;
+  --color-content-inverse: #ffffff;
+
+  /* Border */
+  --color-border-primary: #e2e8f0;
+  --color-border-secondary: #cbd5e1;
+  --color-border-focus: #3b82f6;
+
+  /* Interactive */
+  --color-interactive-primary: #2563eb;
+  --color-interactive-hover: #1d4ed8;
+
+  /* Edge */
+  --color-edge-stroke: #94a3b8;
+
+  /* Shadows */
+  --shadow-panel: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-node: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-node-selected: 0 0 0 2px rgba(37, 99, 235, 0.25);
+
+  /* Category colors (light) */
+  --cat-controller-bg: #dbeafe;
+  --cat-controller-border: #3b82f6;
+  --cat-controller-text: #1e40af;
+  --cat-service-bg: #dcfce7;
+  --cat-service-border: #22c55e;
+  --cat-service-text: #166534;
+  --cat-port-bg: #ede9fe;
+  --cat-port-border: #8b5cf6;
+  --cat-port-text: #5b21b6;
+  --cat-adapter-bg: #ffedd5;
+  --cat-adapter-border: #f97316;
+  --cat-adapter-text: #9a3412;
+  --cat-model-bg: #fee2e2;
+  --cat-model-border: #ef4444;
+  --cat-model-text: #991b1b;
+  --cat-external-bg: #f3f4f6;
+  --cat-external-border: #6b7280;
+  --cat-external-text: #374151;
+  --cat-job-bg: #fef9c3;
+  --cat-job-border: #eab308;
+  --cat-job-text: #854d0e;
+  --cat-dto-bg: #cffafe;
+  --cat-dto-border: #06b6d4;
+  --cat-dto-text: #155e75;
+  --cat-fallback-bg: #f5f5f4;
+  --cat-fallback-border: #a8a29e;
+  --cat-fallback-text: #44403c;
+}
+
+/* ─── Design Tokens (Dark) ─── */
+.dark {
+  --color-surface-canvas: #0c0f14;
+  --color-surface-primary: #151921;
+  --color-surface-secondary: #1e2330;
+  --color-surface-tertiary: #2a3040;
+
+  --color-content-primary: #f1f5f9;
+  --color-content-secondary: #94a3b8;
+  --color-content-tertiary: #64748b;
+  --color-content-inverse: #0f172a;
+
+  --color-border-primary: #2a3040;
+  --color-border-secondary: #334155;
+  --color-border-focus: #60a5fa;
+
+  --color-interactive-primary: #3b82f6;
+  --color-interactive-hover: #60a5fa;
+
+  --color-edge-stroke: #475569;
+
+  --shadow-panel: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-node: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-node-selected: 0 0 0 2px rgba(96, 165, 250, 0.3);
+
+  /* Category colors (dark) */
+  --cat-controller-bg: #1e293b;
+  --cat-controller-border: #60a5fa;
+  --cat-controller-text: #93c5fd;
+  --cat-service-bg: #14291a;
+  --cat-service-border: #4ade80;
+  --cat-service-text: #86efac;
+  --cat-port-bg: #1e1533;
+  --cat-port-border: #a78bfa;
+  --cat-port-text: #c4b5fd;
+  --cat-adapter-bg: #2b1a0a;
+  --cat-adapter-border: #fb923c;
+  --cat-adapter-text: #fdba74;
+  --cat-model-bg: #2b1111;
+  --cat-model-border: #f87171;
+  --cat-model-text: #fca5a5;
+  --cat-external-bg: #1e2330;
+  --cat-external-border: #9ca3af;
+  --cat-external-text: #d1d5db;
+  --cat-job-bg: #2b2506;
+  --cat-job-border: #facc15;
+  --cat-job-text: #fde68a;
+  --cat-dto-bg: #0b2528;
+  --cat-dto-border: #22d3ee;
+  --cat-dto-text: #67e8f9;
+  --cat-fallback-bg: #1c1917;
+  --cat-fallback-border: #a8a29e;
+  --cat-fallback-text: #d6d3d1;
+}
+
 html,
 body,
 #root {
