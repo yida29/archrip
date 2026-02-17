@@ -264,3 +264,23 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
 
   return { data, errors };
 }
+
+/**
+ * Resolve a sourceUrl template with a filePath.
+ * Encodes path segments and only allows http/https URLs.
+ * Keep in sync with packages/viewer/src/data/loader.ts (resolveSourceUrl)
+ */
+export function resolveSourceUrl(template: string | undefined, filePath: string): string {
+  if (!template || !filePath) return '';
+
+  const encoded = filePath.split('/').map(encodeURIComponent).join('/');
+  const resolved = template.replace('{filePath}', encoded);
+
+  try {
+    const url = new URL(resolved);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+    return url.href;
+  } catch {
+    return '';
+  }
+}

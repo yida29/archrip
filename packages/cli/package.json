@@ -13,7 +13,9 @@
     "build": "tsc && npm run copy-templates",
     "copy-templates": "cp -r src/templates dist/ && cp -r src/schema dist/ && node scripts/copy-viewer.js",
     "typecheck": "tsc --noEmit",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "architecture",
@@ -34,7 +36,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "~5.8.0"
+    "typescript": "~5.8.0",
+    "vitest": "^3.0.0"
   },
   "engines": {
     "node": ">=20"
