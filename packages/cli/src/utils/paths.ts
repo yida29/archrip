@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export function getPackageRoot(): string {
+function getPackageRoot(): string {
   // In dist: dist/utils/paths.js → go up to package root
   // In src: src/utils/paths.ts → go up to package root
   return resolve(__dirname, '..', '..');
