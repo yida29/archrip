@@ -6,6 +6,8 @@ description: Scan codebase and generate architecture diagram data
 
 Analyze the current codebase and generate `.archrips/architecture.json`.
 
+**Language rule:** Respond in the same language as the user's message or `$ARGUMENTS`. If no user text is available, detect the project's primary language from README/docs and match it. The `architecture.json` fields (labels, descriptions) should also use that language.
+
 ## Phase 1: Project Discovery
 1. Read top-level files (package.json, composer.json, go.mod, Cargo.toml, pom.xml, pyproject.toml, etc.)
 2. Identify language, framework, source root
@@ -47,41 +49,70 @@ For each component, identify:
 ## Phase 6: Identify Use Cases
 Group related components into user-facing features.
 
-## Phase 7: Draft Review — Ask the Developer
-Before writing the final output, present a summary of what you found and ask the developer to fill in gaps.
+## Phase 7: Draft Review — STOP and ask the developer
 
-**Present:**
+**IMPORTANT: Do NOT proceed to Phase 8 until the developer responds. You MUST stop here and wait for input.**
+
+Present a summary of what you found:
 - List of discovered nodes (grouped by layer/category)
 - List of discovered use cases
 - External services found
 
-**Ask about:**
-- Missing components or layers not visible in code (e.g., infrastructure, CI/CD, queues, cron jobs)
-- External services or APIs the system integrates with that aren't obvious from imports
-- Key use cases or user flows that should be highlighted
-- Any components that should be excluded (test utilities, legacy code, etc.)
-- `sourceUrl` template if not already set (e.g., `https://github.com/org/repo/blob/main/{filePath}`)
+Then ask:
+- Are there missing components, external services, or use cases?
+- Should anything be excluded?
+- What is the `sourceUrl` template? (e.g., `https://github.com/org/repo/blob/main/{filePath}`)
 
-If the developer says "skip" or provides no additional info, proceed with what was discovered.
+End your message with: **"Please review and reply with corrections, or type 'go' to generate."**
 
-**Revision loop:** If the developer requests changes to the draft, apply them and present the updated summary again. Repeat until the developer approves or says "ok" / "go".
+**Do NOT write architecture.json yet. Wait for the developer to respond.**
+
+If the developer replies with corrections, apply them and present the updated summary. Repeat until they say "go" / "ok" / "skip".
 
 ## Phase 8: Generate architecture.json
+Only run this phase AFTER the developer has approved the draft in Phase 7.
+
 Write the complete `.archrips/architecture.json` following the schema, incorporating developer feedback.
 
 After writing the file, tell the developer:
 - Run `npx archrips build && npx archrips serve` to preview
 - Run `/archrips-refine` to make further adjustments (add/remove nodes, fix relationships, etc.)
 
+### Required structure (use EXACTLY these field names)
+
+```json
+{
+  "version": "1.0",
+  "project": { "name": "...", "sourceUrl": "https://github.com/org/repo/blob/main/{filePath}" },
+  "nodes": [
+    { "id": "ctrl-users", "category": "controller", "label": "UsersController", "layer": 1, "filePath": "src/controllers/users.ts", "useCases": ["uc-user-mgmt"] }
+  ],
+  "edges": [
+    { "source": "ctrl-users", "target": "svc-users", "type": "dependency" }
+  ],
+  "useCases": [
+    { "id": "uc-user-mgmt", "name": "User Management", "nodeIds": ["ctrl-users", "svc-users"] }
+  ]
+}
+```
+
+**Critical field names — do NOT use alternatives:**
+- Node: `id`, `category`, `label` (NOT name), `layer` — all required
+- Edge: `source`, `target` (NOT from/to) — all required
+- UseCase: `id`, `name`, `nodeIds` — all required
+
 ### Node Rules
 - `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, ext-, job-, dto-)
 - `layer`: 0=external, 1=entry points, 2=application logic, 3=abstractions, 4=implementations, 5=data
 - `category`: one of controller, service, port, adapter, model, external, job, dto (or custom)
+- `label`: display name for the node
 - `filePath`: relative from project root
 - `depth` (optional): 0=overview (boundary), 1=structure (internal), 2=detail (implementation). Auto-inferred from category if omitted
 - `useCases`: array of use case IDs this node participates in
 
 ### Edge Rules
+- `source`: source node id
+- `target`: target node id
 - `type`: dependency | implements | relation
 - Only include significant architectural dependencies (not utility imports)
 
