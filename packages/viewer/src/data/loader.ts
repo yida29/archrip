@@ -72,6 +72,9 @@ function resolveSourceUrl(template: string | undefined, filePath: string): strin
 
 export async function loadArchitecture(): Promise<LoadedArchitecture> {
   const res = await fetch('/architecture.json');
+  if (!res.ok) {
+    throw new Error(`Failed to fetch architecture.json: ${String(res.status)} ${res.statusText}`);
+  }
   const raw: RawArchData = await res.json();
 
   const schemas = raw.schemas ?? {};
