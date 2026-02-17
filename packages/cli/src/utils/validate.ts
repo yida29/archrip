@@ -83,6 +83,16 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
   if (!data.project?.name) {
     errors.push({ path: 'project.name', message: 'Required field missing' });
   }
+  if (data.project?.sourceUrl) {
+    try {
+      const url = new URL(data.project.sourceUrl.replace('{filePath}', 'test'));
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        errors.push({ path: 'project.sourceUrl', message: 'Must use http: or https: protocol' });
+      }
+    } catch {
+      errors.push({ path: 'project.sourceUrl', message: 'Must be a valid URL template' });
+    }
+  }
   if (!Array.isArray(data.nodes)) {
     errors.push({ path: 'nodes', message: 'Must be an array' });
   }
@@ -99,7 +109,16 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
       if (!node.id) errors.push({ path: `${prefix}.id`, message: 'Required' });
       if (!node.category) errors.push({ path: `${prefix}.category`, message: 'Required' });
       if (!node.label) errors.push({ path: `${prefix}.label`, message: 'Required' });
-      if (typeof node.layer !== 'number') errors.push({ path: `${prefix}.layer`, message: 'Must be a number' });
+      if (typeof node.layer !== 'number') {
+        errors.push({ path: `${prefix}.layer`, message: 'Must be a number' });
+      } else if (!Number.isInteger(node.layer) || node.layer < 0 || node.layer > 100) {
+        errors.push({ path: `${prefix}.layer`, message: 'Must be an integer between 0 and 100' });
+      }
+      if (node.filePath) {
+        if (node.filePath.includes('..') || node.filePath.startsWith('/')) {
+          errors.push({ path: `${prefix}.filePath`, message: 'Must be a relative path without ".." segments' });
+        }
+      }
       if (node.id && nodeIds.has(node.id)) {
         errors.push({ path: `${prefix}.id`, message: `Duplicate node id: "${node.id}"` });
       }
@@ -136,6 +155,46 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
             errors.push({ path: `${prefix}.nodeIds`, message: `References unknown node: "${nodeId}"` });
           }
         }
+      }
+    }
+  }
+
+  // Detect circular edges
+  if (Array.isArray(data.edges) && nodeIds.size > 0) {
+    const adj = new Map<string, string[]>();
+    for (const edge of data.edges) {
+      if (edge.source && edge.target) {
+        const targets = adj.get(edge.source);
+        if (targets) {
+          targets.push(edge.target);
+        } else {
+          adj.set(edge.source, [edge.target]);
+        }
+      }
+    }
+    const visited = new Set<string>();
+    const inStack = new Set<string>();
+    let hasCycle = false;
+    function dfs(node: string): void {
+      if (hasCycle) return;
+      visited.add(node);
+      inStack.add(node);
+      for (const neighbor of adj.get(node) ?? []) {
+        if (inStack.has(neighbor)) {
+          hasCycle = true;
+          errors.push({ path: 'edges', message: `Circular dependency detected involving "${neighbor}"` });
+          return;
+        }
+        if (!visited.has(neighbor)) {
+          dfs(neighbor);
+        }
+      }
+      inStack.delete(node);
+    }
+    for (const nodeId of nodeIds) {
+      if (!visited.has(nodeId)) {
+        dfs(nodeId);
+        if (hasCycle) break;
       }
     }
   }
