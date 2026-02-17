@@ -1,9 +1,11 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
+  useReactFlow,
 } from '@xyflow/react';
 import type { NodeMouseHandler } from '@xyflow/react';
 import { useQueryState, parseAsString } from 'nuqs';
@@ -24,12 +26,13 @@ import { useTheme } from './hooks/useTheme.ts';
 
 const nodeTypes = { archNode: ArchNode };
 
-export default function App() {
+function AppInner() {
   const { nodes, edges, useCases, projectName, loading, error, onNodesChange, onEdgesChange } = useArchitecture();
   const { depthLevel, setDepthLevel, visibleNodes, visibleEdges } = useDepthFilter(nodes, edges);
   const { selectedUseCase, setSelectedUseCase, categories, filteredNodes, filteredEdges } = useUseCaseFilter(visibleNodes, visibleEdges, useCases);
   const [selectedNodeId, setSelectedNodeId] = useQueryState('node', parseAsString.withOptions({ history: 'replace' }));
   const { theme, toggleTheme } = useTheme();
+  const { fitView } = useReactFlow();
 
   const selectedNodeData: ArchNodeData | null = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -53,6 +56,13 @@ export default function App() {
     void setSelectedUseCase(ucId);
     void setSelectedNodeId(null);
   }, [setSelectedUseCase, setSelectedNodeId]);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      fitView({ padding: 0.15, duration: 300 });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [depthLevel, selectedUseCase, fitView]);
 
   if (loading) {
     return (
@@ -86,7 +96,7 @@ export default function App() {
         colorMode={theme}
         fitView
         fitViewOptions={{ padding: 0.15 }}
-        minZoom={0.2}
+        minZoom={0.05}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
       >
@@ -145,5 +155,13 @@ export default function App() {
         </>
       )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ReactFlowProvider>
+      <AppInner />
+    </ReactFlowProvider>
   );
 }
