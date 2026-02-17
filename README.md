@@ -67,6 +67,7 @@ Supports: Claude Code (`.claude/commands/`), Gemini CLI (`.gemini/commands/`), C
       "description": "User CRUD operations",
       "filePath": "src/controllers/users.ts",
       "layer": 1,
+      "depth": 0,
       "methods": ["list", "create", "update", "delete"],
       "routes": ["GET /api/users", "POST /api/users"],
       "useCases": ["uc-user-mgmt"]
@@ -110,6 +111,18 @@ Supports: Claude Code (`.claude/commands/`), Gemini CLI (`.gemini/commands/`), C
 
 Custom categories are supported — they get a fallback color.
 
+### Depth (Abstraction Level)
+
+The optional `depth` field (0–2) controls which nodes appear at each abstraction level. If omitted, it is auto-inferred from the category:
+
+| Depth | Label | Default Categories |
+|-------|-------|--------------------|
+| 0 | Overview | `controller`, `external` |
+| 1 | Structure | `service`, `port`, `adapter`, `job` |
+| 2 | Detail | `model`, `dto` |
+
+The viewer provides a 3-level toggle (Overview / Structure / Detail) to show or hide nodes by depth.
+
 ### Layers
 
 The `layer` field controls vertical positioning (dagre handles horizontal):
@@ -146,7 +159,8 @@ archrips is framework-agnostic. The AI agent adapts its analysis based on the de
 ## Viewer Features
 
 - Interactive React Flow graph (drag, zoom, pan)
-- Use case filtering (highlight specific feature flows)
+- **Depth filter** — 3-level abstraction toggle (Overview / Structure / Detail)
+- **Use case filter** — highlight specific feature flows
 - Detail panel (click nodes for full info: routes, methods, source links, DB schema)
 - Color-coded categories with legend
 - MiniMap navigation
