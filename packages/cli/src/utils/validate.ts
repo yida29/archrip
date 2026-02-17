@@ -71,44 +71,44 @@ export interface ValidationError {
 }
 
 /**
- * Verify that the viewer directory was created by `archrips init`.
+ * Verify that the viewer directory was created by `archrip init`.
  * Checks: existence, symlink rejection, path containment, marker file, package.json name.
  * Throws if any check fails.
  */
 export function validateViewerDir(viewerDir: string): void {
   if (!existsSync(viewerDir)) {
     throw new Error(
-      '.archrips/viewer/ not found.\nRun `npx archrips init .` to set up the viewer.',
+      '.archrip/viewer/ not found.\nRun `npx archrip init .` to set up the viewer.',
     );
   }
 
   // Reject symlinks — prevent redirection to arbitrary directories
   if (lstatSync(viewerDir).isSymbolicLink()) {
     throw new Error(
-      '.archrips/viewer/ is a symbolic link, which is not allowed.\n'
+      '.archrip/viewer/ is a symbolic link, which is not allowed.\n'
       + 'This is a safety check to prevent executing code outside the project.\n'
-      + 'Remove the symlink and re-run `npx archrips init .`.',
+      + 'Remove the symlink and re-run `npx archrip init .`.',
     );
   }
 
-  // Ensure realpath stays within .archrips/
-  const archripsDir = resolve(viewerDir, '..');
+  // Ensure realpath stays within .archrip/
+  const archripDir = resolve(viewerDir, '..');
   const realViewerDir = realpathSync(viewerDir);
-  const realArchripsDir = realpathSync(archripsDir);
+  const realArchripsDir = realpathSync(archripDir);
   if (!realViewerDir.startsWith(realArchripsDir + '/')) {
     throw new Error(
-      '.archrips/viewer/ resolves outside of .archrips/.\n'
+      '.archrip/viewer/ resolves outside of .archrip/.\n'
       + 'This is a safety check to prevent executing code outside the project.',
     );
   }
 
   // Check marker file
-  const markerPath = join(viewerDir, '.archrips-viewer');
-  if (!existsSync(markerPath) || readFileSync(markerPath, 'utf-8').trim() !== 'archrips-official-viewer') {
+  const markerPath = join(viewerDir, '.archrip-viewer');
+  if (!existsSync(markerPath) || readFileSync(markerPath, 'utf-8').trim() !== 'archrip-official-viewer') {
     throw new Error(
-      '.archrips/viewer/ does not appear to be an official archrips viewer.\n'
+      '.archrip/viewer/ does not appear to be an official archrip viewer.\n'
       + 'This is a safety check to prevent executing untrusted code.\n'
-      + 'Re-run `npx archrips init .` to reinstall the viewer.',
+      + 'Re-run `npx archrip init .` to reinstall the viewer.',
     );
   }
 
@@ -116,16 +116,16 @@ export function validateViewerDir(viewerDir: string): void {
   const pkgJsonPath = join(viewerDir, 'package.json');
   if (!existsSync(pkgJsonPath)) {
     throw new Error(
-      '.archrips/viewer/package.json not found.\n'
-      + 'Re-run `npx archrips init .` to reinstall the viewer.',
+      '.archrip/viewer/package.json not found.\n'
+      + 'Re-run `npx archrip init .` to reinstall the viewer.',
     );
   }
   const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8')) as Record<string, unknown>;
-  if (pkg.name !== 'archrips-viewer') {
+  if (pkg.name !== 'archrip-viewer') {
     throw new Error(
-      '.archrips/viewer/package.json has unexpected name.\n'
+      '.archrip/viewer/package.json has unexpected name.\n'
       + 'This is a safety check to prevent executing untrusted code.\n'
-      + 'Re-run `npx archrips init .` to reinstall the viewer.',
+      + 'Re-run `npx archrip init .` to reinstall the viewer.',
     );
   }
 }

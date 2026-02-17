@@ -6,7 +6,7 @@ import { join } from 'node:path';
  */
 export function updateGitignore(projectDir: string): void {
   const gitignorePath = join(projectDir, '.gitignore');
-  const linesToAdd = ['.archrips/viewer/node_modules/', '.archrips/viewer/dist/', '.archrips/dist/'];
+  const linesToAdd = ['.archrip/viewer/node_modules/', '.archrip/viewer/dist/', '.archrip/dist/'];
 
   let content = '';
   if (existsSync(gitignorePath)) {
@@ -16,8 +16,8 @@ export function updateGitignore(projectDir: string): void {
   const missingLines = linesToAdd.filter((line) => !content.includes(line));
   if (missingLines.length > 0) {
     const separator = content.endsWith('\n') || content === '' ? '' : '\n';
-    const block = `${separator}\n# archrips\n${missingLines.join('\n')}\n`;
+    const block = `${separator}\n# archrip\n${missingLines.join('\n')}\n`;
     writeFileSync(gitignorePath, content + block);
-    console.log('  + .gitignore (archrips entries)');
+    console.log('  + .gitignore (archrip entries)');
   }
 }

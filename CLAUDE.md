@@ -1,4 +1,4 @@
-# archrips
+# archrip
 
 CLIツール: コードベースからインタラクティブなアーキテクチャ図を自動生成（OSS）。
 
@@ -31,10 +31,10 @@ npm run test:watch -w packages/cli
 ```bash
 npm run build
 cd /tmp && mkdir test-project && cd test-project
-node ~/work/archrips/packages/cli/dist/index.js init .
-cp ~/work/archrips/examples/laravel-kiyaku/architecture.json .archrips/
-node ~/work/archrips/packages/cli/dist/index.js build
-node ~/work/archrips/packages/cli/dist/index.js serve
+node ~/work/archrip/packages/cli/dist/index.js init .
+cp ~/work/archrip/examples/laravel-kiyaku/architecture.json .archrip/
+node ~/work/archrip/packages/cli/dist/index.js build
+node ~/work/archrip/packages/cli/dist/index.js serve
 ```
 
 ## npm publish
@@ -47,7 +47,7 @@ cd packages/cli && npm run build && npm publish --access public
 
 ```
 packages/
-├── cli/          # npm公開パッケージ (archrips)
+├── cli/          # npm公開パッケージ (archrip)
 │   ├── src/commands/    # init, build, serve
 │   ├── src/utils/       # validate, layout, detect-agents, paths, project-info, gitignore
 │   ├── src/install/     # viewer, slash-commands

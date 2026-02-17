@@ -6,8 +6,8 @@ import { validateViewerDir } from '../utils/validate.js';
 
 export async function serve(): Promise<void> {
   const projectDir = process.cwd();
-  const distDir = join(projectDir, '.archrips', 'dist');
-  const viewerDir = join(projectDir, '.archrips', 'viewer');
+  const distDir = join(projectDir, '.archrip', 'dist');
+  const viewerDir = join(projectDir, '.archrip', 'viewer');
 
   // Verify viewer origin before executing anything in that directory
   validateViewerDir(viewerDir);
@@ -18,7 +18,7 @@ export async function serve(): Promise<void> {
     await build();
   }
 
-  console.log('\narchrips serve — Starting preview server...\n');
+  console.log('\narchrip serve — Starting preview server...\n');
 
   // Use vite preview to serve the built files
   try {

@@ -5,9 +5,9 @@ user-invocable: true
 argument-hint: "[changes to apply]"
 ---
 
-# archrips refine — Refine architecture diagram
+# archrip refine — Refine architecture diagram
 
-Read `.archrips/architecture.json` and apply the user's requested changes:
+Read `.archrip/architecture.json` and apply the user's requested changes:
 - Add/remove/modify nodes
 - Fix relationships
 - Add/modify use cases
@@ -15,6 +15,6 @@ Read `.archrips/architecture.json` and apply the user's requested changes:
 - Add database schemas
 - Improve descriptions
 
-Write the updated `.archrips/architecture.json`.
+Write the updated `.archrip/architecture.json`.
 
 $ARGUMENTS

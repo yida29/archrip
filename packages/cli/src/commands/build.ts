@@ -51,22 +51,22 @@ function runViewerBuild(viewerDir: string, distDir: string): void {
 
 export async function build(): Promise<void> {
   const projectDir = process.cwd();
-  const archripsDir = join(projectDir, '.archrips');
-  const archJsonPath = join(archripsDir, 'architecture.json');
-  const viewerDir = join(archripsDir, 'viewer');
-  const distDir = join(archripsDir, 'dist');
+  const archripDir = join(projectDir, '.archrip');
+  const archJsonPath = join(archripDir, 'architecture.json');
+  const viewerDir = join(archripDir, 'viewer');
+  const distDir = join(archripDir, 'dist');
 
-  console.log('\narchrips build\n');
+  console.log('\narchrip build\n');
 
   // 1. Check architecture.json exists
   if (!existsSync(archJsonPath)) {
     throw new Error(
-      '.archrips/architecture.json not found.\n'
-      + 'Run `npx archrips init .` first, then use /archrips-scan to generate data.',
+      '.archrip/architecture.json not found.\n'
+      + 'Run `npx archrip init .` first, then use /archrip-scan to generate data.',
     );
   }
 
-  // 2. Check viewer exists and verify it was created by archrips init
+  // 2. Check viewer exists and verify it was created by archrip init
   validateViewerDir(viewerDir);
 
   // 3. Validate architecture.json
@@ -92,6 +92,6 @@ export async function build(): Promise<void> {
   // 6. Build viewer and copy dist
   runViewerBuild(viewerDir, distDir);
 
-  console.log(`\nBuild complete! Output: .archrips/dist/`);
-  console.log('Run `npx archrips serve` to preview.');
+  console.log(`\nBuild complete! Output: .archrip/dist/`);
+  console.log('Run `npx archrip serve` to preview.');
 }

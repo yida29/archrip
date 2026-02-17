@@ -2,9 +2,9 @@
 description: Scan codebase and generate architecture diagram data
 ---
 
-# archrips scan — Analyze codebase architecture
+# archrip scan — Analyze codebase architecture
 
-Analyze the current codebase and generate `.archrips/architecture.json`.
+Analyze the current codebase and generate `.archrip/architecture.json`.
 
 **Language rule:** Respond in the same language as the user's message or `$ARGUMENTS`. If no user text is available, detect the project's primary language from README/docs and match it. The `architecture.json` fields (labels, descriptions) should also use that language.
 
@@ -72,11 +72,11 @@ If the developer replies with corrections, apply them and present the updated su
 ## Phase 8: Generate architecture.json
 Only run this phase AFTER the developer has approved the draft in Phase 7.
 
-Write the complete `.archrips/architecture.json` following the schema, incorporating developer feedback.
+Write the complete `.archrip/architecture.json` following the schema, incorporating developer feedback.
 
 After writing the file, tell the developer:
-- Run `npx archrips build && npx archrips serve` to preview
-- Run `/archrips-refine` to make further adjustments (add/remove nodes, fix relationships, etc.)
+- Run `npx archrip build && npx archrip serve` to preview
+- Run `/archrip-refine` to make further adjustments (add/remove nodes, fix relationships, etc.)
 
 ### Required structure (use EXACTLY these field names)
 

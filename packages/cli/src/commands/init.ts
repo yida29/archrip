@@ -9,18 +9,18 @@ import { updateGitignore } from '../utils/gitignore.js';
 
 export async function init(targetPath: string): Promise<void> {
   const projectDir = resolve(targetPath);
-  console.log(`\narchrips init — ${projectDir}\n`);
+  console.log(`\narchrip init — ${projectDir}\n`);
 
   // 1. Detect project info
   const projectInfo = detectProjectInfo(projectDir);
   console.log(`Detected: ${projectInfo.language}${projectInfo.framework ? ` / ${projectInfo.framework}` : ''}`);
 
-  // 2. Create .archrips/ directory
-  const archripsDir = join(projectDir, '.archrips');
-  mkdirSync(archripsDir, { recursive: true });
+  // 2. Create .archrip/ directory
+  const archripDir = join(projectDir, '.archrip');
+  mkdirSync(archripDir, { recursive: true });
 
   // 3. Write architecture.json skeleton
-  const archJsonPath = join(archripsDir, 'architecture.json');
+  const archJsonPath = join(archripDir, 'architecture.json');
   if (!existsSync(archJsonPath)) {
     const templatesDir = getTemplatesDir();
     const skeleton = JSON.parse(readFileSync(join(templatesDir, 'skeleton.json'), 'utf-8')) as Record<string, unknown>;
@@ -29,13 +29,13 @@ export async function init(targetPath: string): Promise<void> {
     project.language = projectInfo.language;
     project.framework = projectInfo.framework;
     writeFileSync(archJsonPath, JSON.stringify(skeleton, null, 2) + '\n');
-    console.log('  + .archrips/architecture.json (skeleton)');
+    console.log('  + .archrip/architecture.json (skeleton)');
   } else {
-    console.log('  ~ .archrips/architecture.json (already exists, skipped)');
+    console.log('  ~ .archrip/architecture.json (already exists, skipped)');
   }
 
   // 4. Copy viewer template
-  installViewer(archripsDir);
+  installViewer(archripDir);
 
   // 5. Detect agents and install slash commands
   const detected = detectAgents(projectDir);
@@ -56,8 +56,8 @@ export async function init(targetPath: string): Promise<void> {
 
   console.log(`
 Done! Next steps:
-  1. Run /archrips-scan in your AI agent to analyze the codebase
-  2. Run: npx archrips build
-  3. Run: npx archrips serve
+  1. Run /archrip-scan in your AI agent to analyze the codebase
+  2. Run: npx archrip build
+  3. Run: npx archrip serve
 `);
 }

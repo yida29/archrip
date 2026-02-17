@@ -3,11 +3,11 @@ import { join } from 'node:path';
 import { getViewerDir } from '../utils/paths.js';
 
 /**
- * Copy the viewer template to .archrips/viewer/
+ * Copy the viewer template to .archrip/viewer/
  */
-export function installViewer(archripsDir: string): void {
+export function installViewer(archripDir: string): void {
   const viewerSrc = getViewerDir();
-  const viewerDest = join(archripsDir, 'viewer');
+  const viewerDest = join(archripDir, 'viewer');
 
   if (!existsSync(viewerSrc)) {
     console.log('  ! Viewer template not found (expected in monorepo). Skipping viewer copy.');
@@ -20,8 +20,8 @@ export function installViewer(archripsDir: string): void {
   copyDirRecursive(viewerSrc, viewerDest, ['node_modules', 'dist', '.tsbuildinfo']);
 
   // Write marker file to verify viewer origin in build/serve
-  writeFileSync(join(viewerDest, '.archrips-viewer'), 'archrips-official-viewer\n');
-  console.log('  + .archrips/viewer/ (viewer template)');
+  writeFileSync(join(viewerDest, '.archrip-viewer'), 'archrip-official-viewer\n');
+  console.log('  + .archrip/viewer/ (viewer template)');
 }
 
 function copyDirRecursive(src: string, dest: string, skipDirs: string[]): void {

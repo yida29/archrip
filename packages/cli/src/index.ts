@@ -20,7 +20,7 @@ async function main(): Promise<void> {
       break;
     case '--version':
     case '-v':
-      console.log('archrips v0.1.0');
+      console.log('archrip v0.1.0');
       break;
     case '--help':
     case '-h':
@@ -36,22 +36,22 @@ async function main(): Promise<void> {
 
 function printUsage(): void {
   console.log(`
-archrips - Generate interactive architecture diagrams from your codebase
+archrip - Generate interactive architecture diagrams from your codebase
 
 Usage:
-  archrips init [path]    Initialize archrips in a project directory
-  archrips build          Build the architecture viewer (static HTML)
-  archrips serve          Preview the built viewer in browser
+  archrip init [path]    Initialize archrip in a project directory
+  archrip build          Build the architecture viewer (static HTML)
+  archrip serve          Preview the built viewer in browser
 
 Options:
   -v, --version           Show version
   -h, --help              Show this help
 
 Workflow:
-  1. npx archrips init .          # Setup project + install slash commands
-  2. /archrips-scan               # AI scans codebase → architecture.json
-  3. npx archrips build           # Build static HTML viewer
-  4. npx archrips serve           # Preview in browser
+  1. npx archrip init .          # Setup project + install slash commands
+  2. /archrip-scan               # AI scans codebase → architecture.json
+  3. npx archrip build           # Build static HTML viewer
+  4. npx archrip serve           # Preview in browser
 `);
 }
 

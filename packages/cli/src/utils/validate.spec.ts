@@ -7,7 +7,7 @@ import { loadAndValidate, validateViewerDir, resolveSourceUrl } from './validate
 // ─── Helpers ───
 
 function createTmpDir(): string {
-  const dir = join(tmpdir(), `archrips-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const dir = join(tmpdir(), `archrip-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(dir, { recursive: true });
   return dir;
 }
@@ -272,11 +272,11 @@ describe('validateViewerDir', () => {
   });
 
   function setupValidViewer(baseDir: string): string {
-    const archripsDir = join(baseDir, '.archrips');
-    const viewerDir = join(archripsDir, 'viewer');
+    const archripDir = join(baseDir, '.archrip');
+    const viewerDir = join(archripDir, 'viewer');
     mkdirSync(viewerDir, { recursive: true });
-    writeFileSync(join(viewerDir, '.archrips-viewer'), 'archrips-official-viewer\n');
-    writeFileSync(join(viewerDir, 'package.json'), JSON.stringify({ name: 'archrips-viewer' }));
+    writeFileSync(join(viewerDir, '.archrip-viewer'), 'archrip-official-viewer\n');
+    writeFileSync(join(viewerDir, 'package.json'), JSON.stringify({ name: 'archrip-viewer' }));
     return viewerDir;
   }
 
@@ -290,37 +290,37 @@ describe('validateViewerDir', () => {
   });
 
   it('should throw when marker file is missing', () => {
-    const archripsDir = join(tmpDir, '.archrips');
-    const viewerDir = join(archripsDir, 'viewer');
+    const archripDir = join(tmpDir, '.archrip');
+    const viewerDir = join(archripDir, 'viewer');
     mkdirSync(viewerDir, { recursive: true });
-    writeFileSync(join(viewerDir, 'package.json'), JSON.stringify({ name: 'archrips-viewer' }));
-    expect(() => validateViewerDir(viewerDir)).toThrow('official archrips viewer');
+    writeFileSync(join(viewerDir, 'package.json'), JSON.stringify({ name: 'archrip-viewer' }));
+    expect(() => validateViewerDir(viewerDir)).toThrow('official archrip viewer');
   });
 
   it('should throw when marker file has wrong content', () => {
-    const archripsDir = join(tmpDir, '.archrips');
-    const viewerDir = join(archripsDir, 'viewer');
+    const archripDir = join(tmpDir, '.archrip');
+    const viewerDir = join(archripDir, 'viewer');
     mkdirSync(viewerDir, { recursive: true });
-    writeFileSync(join(viewerDir, '.archrips-viewer'), 'malicious-viewer\n');
-    writeFileSync(join(viewerDir, 'package.json'), JSON.stringify({ name: 'archrips-viewer' }));
-    expect(() => validateViewerDir(viewerDir)).toThrow('official archrips viewer');
+    writeFileSync(join(viewerDir, '.archrip-viewer'), 'malicious-viewer\n');
+    writeFileSync(join(viewerDir, 'package.json'), JSON.stringify({ name: 'archrip-viewer' }));
+    expect(() => validateViewerDir(viewerDir)).toThrow('official archrip viewer');
   });
 
   it('should throw when package.json has wrong name', () => {
-    const archripsDir = join(tmpDir, '.archrips');
-    const viewerDir = join(archripsDir, 'viewer');
+    const archripDir = join(tmpDir, '.archrip');
+    const viewerDir = join(archripDir, 'viewer');
     mkdirSync(viewerDir, { recursive: true });
-    writeFileSync(join(viewerDir, '.archrips-viewer'), 'archrips-official-viewer\n');
+    writeFileSync(join(viewerDir, '.archrip-viewer'), 'archrip-official-viewer\n');
     writeFileSync(join(viewerDir, 'package.json'), JSON.stringify({ name: 'malicious-app' }));
     expect(() => validateViewerDir(viewerDir)).toThrow('unexpected name');
   });
 
   it('should throw when viewer is a symlink', () => {
-    const archripsDir = join(tmpDir, '.archrips');
-    mkdirSync(archripsDir, { recursive: true });
+    const archripDir = join(tmpDir, '.archrip');
+    mkdirSync(archripDir, { recursive: true });
     const realDir = join(tmpDir, 'real-viewer');
     mkdirSync(realDir);
-    const viewerDir = join(archripsDir, 'viewer');
+    const viewerDir = join(archripDir, 'viewer');
     symlinkSync(realDir, viewerDir);
     expect(() => validateViewerDir(viewerDir)).toThrow('symbolic link');
   });

@@ -1,5 +1,5 @@
 {
-  "name": "archrips-monorepo",
+  "name": "archrip-monorepo",
   "private": true,
   "workspaces": [
     "packages/cli",

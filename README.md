@@ -1,34 +1,34 @@
-# archrips
+# archrip
 
 Generate interactive architecture diagrams from your codebase using AI.
 
-archrips lets Claude Code analyze your codebase and produce a self-contained, interactive architecture viewer as static HTML — deployable anywhere.
+archrip lets Claude Code analyze your codebase and produce a self-contained, interactive architecture viewer as static HTML — deployable anywhere.
 
 ## Quick Start
 
 ```bash
 # 1. Install the plugin
-/plugin marketplace add yida29/archrips
-/plugin install archrips@archrips
+/plugin marketplace add yida29/archrip
+/plugin install archrip@archrip
 
 # 2. Initialize in your project
-npx archrips init .
+npx archrip init .
 
 # 3. Scan the codebase
-/archrips:scan
+/archrip:scan
 
 # 4. Build & preview
-npx archrips build
-npx archrips serve
+npx archrip build
+npx archrip serve
 ```
 
 ## How It Works
 
-1. **Install plugin** — `/plugin marketplace add yida29/archrips` registers the plugin, `/plugin install archrips@archrips` installs it
-2. **`archrips init`** — sets up `.archrips/` in your project
-3. **`/archrips:scan`** — Claude reads your codebase and docs, asks you to review the draft, then generates `.archrips/architecture.json`
-4. **`archrips build`** — validates the JSON, computes layout with dagre, and builds a static React Flow viewer
-5. **`archrips serve`** — serves the built HTML locally for preview
+1. **Install plugin** — `/plugin marketplace add yida29/archrip` registers the plugin, `/plugin install archrip@archrip` installs it
+2. **`archrip init`** — sets up `.archrip/` in your project
+3. **`/archrip:scan`** — Claude reads your codebase and docs, asks you to review the draft, then generates `.archrip/architecture.json`
+4. **`archrip build`** — validates the JSON, computes layout with dagre, and builds a static React Flow viewer
+5. **`archrip serve`** — serves the built HTML locally for preview
 
 The output is a standalone `dist/` folder you can deploy to GitHub Pages, Netlify, or share as a zip.
 
@@ -36,17 +36,17 @@ The output is a standalone `dist/` folder you can deploy to GitHub Pages, Netlif
 
 | Skill | Description |
 |-------|-------------|
-| `/archrips:scan` | Full codebase scan — reads code & docs, presents draft for review, generates `architecture.json` |
-| `/archrips:update` | Incremental update based on `git diff` |
-| `/archrips:refine` | Interactive refinement (add/remove/modify nodes) |
+| `/archrip:scan` | Full codebase scan — reads code & docs, presents draft for review, generates `architecture.json` |
+| `/archrip:update` | Incremental update based on `git diff` |
+| `/archrip:refine` | Interactive refinement (add/remove/modify nodes) |
 
 ## CLI Commands
 
 | Command | Description |
 |---------|-------------|
-| `npx archrips init [path]` | Initialize archrips in a project (default: `.`) |
-| `npx archrips build` | Build the architecture viewer to `.archrips/dist/` |
-| `npx archrips serve` | Preview the built viewer at `localhost:4173` |
+| `npx archrip init [path]` | Initialize archrip in a project (default: `.`) |
+| `npx archrip build` | Build the architecture viewer to `.archrip/dist/` |
+| `npx archrip serve` | Preview the built viewer at `localhost:4173` |
 
 ## architecture.json Format
 
@@ -146,7 +146,7 @@ The `layer` field controls vertical positioning (dagre handles horizontal):
 
 ## Framework Support
 
-archrips is framework-agnostic. The AI adapts its analysis based on the detected framework:
+archrip is framework-agnostic. The AI adapts its analysis based on the detected framework:
 
 - **Laravel** — Controllers → Services → Ports → Adapters → Models
 - **Express/NestJS** — Routes/Controllers → Services → Repositories → Models
