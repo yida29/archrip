@@ -6,6 +6,7 @@
     "group:recommended",
     ":separateMajorReleases"
   ],
+  "mode": "full",
   "labels": ["dependencies"],
   "packageRules": [
     {
