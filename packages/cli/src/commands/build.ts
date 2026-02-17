@@ -1,4 +1,4 @@
-import { existsSync, writeFileSync, mkdirSync, cpSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, cpSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 import { loadAndValidate } from '../utils/validate.js';
@@ -20,10 +20,17 @@ export async function build(): Promise<void> {
     process.exit(1);
   }
 
-  // 2. Check viewer exists
+  // 2. Check viewer exists and verify it was created by archrips init
   if (!existsSync(viewerDir)) {
     console.error('Error: .archrips/viewer/ not found.');
     console.error('Run `npx archrips init .` to set up the viewer.');
+    process.exit(1);
+  }
+  const markerPath = join(viewerDir, '.archrips-viewer');
+  if (!existsSync(markerPath) || readFileSync(markerPath, 'utf-8').trim() !== 'archrips-official-viewer') {
+    console.error('Error: .archrips/viewer/ does not appear to be an official archrips viewer.');
+    console.error('This is a safety check to prevent executing untrusted code.');
+    console.error('Re-run `npx archrips init .` to reinstall the viewer.');
     process.exit(1);
   }
 

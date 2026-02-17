@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "tsc && npm run copy-templates",
-    "copy-templates": "cp -r src/templates dist/ && cp -r src/schema dist/",
+    "copy-templates": "cp -r src/templates dist/ && cp -r src/schema dist/ && node scripts/copy-viewer.js",
     "typecheck": "tsc --noEmit",
     "dev": "tsc --watch"
   },

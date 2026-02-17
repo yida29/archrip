@@ -23,7 +23,10 @@ function getTemplatesDir(): string {
 
 function getViewerDir(): string {
   const pkgRoot = getPackageRoot();
-  // Monorepo: packages/cli → packages/viewer
+  // 1. Published CLI: dist/viewer-template/ (bundled with CLI package)
+  const bundled = join(pkgRoot, 'dist', 'viewer-template');
+  if (existsSync(bundled)) return bundled;
+  // 2. Monorepo development: packages/cli → packages/viewer
   return resolve(pkgRoot, '..', 'viewer');
 }
 
@@ -149,6 +152,9 @@ function installViewer(archripsDir: string): void {
 
   // Copy viewer files recursively, skipping node_modules and dist
   copyDirRecursive(viewerSrc, viewerDest, ['node_modules', 'dist', '.tsbuildinfo']);
+
+  // Write marker file to verify viewer origin in build/serve
+  writeFileSync(join(viewerDest, '.archrips-viewer'), 'archrips-official-viewer\n');
   console.log('  + .archrips/viewer/ (viewer template)');
 }
 
