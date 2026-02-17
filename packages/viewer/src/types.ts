@@ -44,6 +44,10 @@ export function getCategoryLabel(category: string): string {
   return labels[category as StandardCategory] ?? category.charAt(0).toUpperCase() + category.slice(1);
 }
 
+// ─── React Flow node type alias ───
+
+import type { Node } from '@xyflow/react';
+
 // ─── Data types ───
 
 export interface ColumnSchema {
@@ -85,3 +89,7 @@ export interface UseCase {
   nodeIds: string[];
   flow?: string[];
 }
+
+// ─── React Flow typed node ───
+
+export type ArchFlowNode = Node<ArchNodeData>;

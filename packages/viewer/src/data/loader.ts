@@ -1,5 +1,5 @@
-import type { Node, Edge } from '@xyflow/react';
-import type { ArchNodeData, UseCase, TableSchema } from '../types.ts';
+import type { Edge } from '@xyflow/react';
+import type { ArchFlowNode, ArchNodeData, UseCase, TableSchema } from '../types.ts';
 
 interface RawArchData {
   version: string;
@@ -50,14 +50,24 @@ interface RawUseCase {
 
 export interface LoadedArchitecture {
   projectName: string;
-  nodes: Node[];
+  nodes: ArchFlowNode[];
   edges: Edge[];
   useCases: UseCase[];
 }
 
 function resolveSourceUrl(template: string | undefined, filePath: string): string {
   if (!template || !filePath) return '';
-  return template.replace('{filePath}', filePath);
+
+  const encoded = filePath.split('/').map(encodeURIComponent).join('/');
+  const resolved = template.replace('{filePath}', encoded);
+
+  try {
+    const url = new URL(resolved);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+    return url.href;
+  } catch {
+    return '';
+  }
 }
 
 export async function loadArchitecture(): Promise<LoadedArchitecture> {
@@ -69,7 +79,7 @@ export async function loadArchitecture(): Promise<LoadedArchitecture> {
   const sourceUrlTemplate = raw.project.sourceUrl;
 
   // Convert raw nodes to React Flow nodes
-  const nodes: Node[] = raw.nodes.map((n) => {
+  const nodes: ArchFlowNode[] = raw.nodes.map((n) => {
     const pos = layout[n.id] ?? { x: 0, y: 0 };
     const resolvedSchema = n.schema ? schemas[n.schema] : undefined;
 

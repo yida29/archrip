@@ -7,10 +7,10 @@ import {
   useNodesState,
   useEdgesState,
 } from '@xyflow/react';
-import type { Node, Edge, NodeMouseHandler } from '@xyflow/react';
+import type { Edge, NodeMouseHandler } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import type { ArchNodeData, UseCase } from './types.ts';
+import type { ArchFlowNode, ArchNodeData, UseCase } from './types.ts';
 import { getCategoryColors } from './types.ts';
 import { loadArchitecture } from './data/loader.ts';
 import { ArchNode } from './components/nodes/ArchNode.tsx';
@@ -21,7 +21,7 @@ import { Legend } from './components/Legend.tsx';
 const nodeTypes = { archNode: ArchNode };
 
 export default function App() {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<ArchFlowNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [useCases, setUseCases] = useState<UseCase[]>([]);
   const [projectName, setProjectName] = useState('Architecture Viewer');
@@ -50,8 +50,7 @@ export default function App() {
   const categories = useMemo(() => {
     const set = new Set<string>();
     for (const node of nodes) {
-      const data = node.data as unknown as ArchNodeData;
-      set.add(data.category);
+      set.add(node.data.category);
     }
     return Array.from(set);
   }, [nodes]);
@@ -91,8 +90,8 @@ export default function App() {
     }));
   }, [edges, selectedUseCase, useCases]);
 
-  const onNodeClick: NodeMouseHandler = useCallback((_event, node: Node) => {
-    setSelectedNodeData(node.data as unknown as ArchNodeData);
+  const onNodeClick: NodeMouseHandler<ArchFlowNode> = useCallback((_event, node) => {
+    setSelectedNodeData(node.data);
   }, []);
 
   const onPaneClick = useCallback(() => {
@@ -147,7 +146,7 @@ export default function App() {
         <Controls showInteractive={false} />
         <MiniMap
           nodeColor={(node) => {
-            const data = node.data as unknown as ArchNodeData;
+            const data = node.data as ArchNodeData;
             return getCategoryColors(data.category).border;
           }}
           maskColor="rgba(0,0,0,0.08)"

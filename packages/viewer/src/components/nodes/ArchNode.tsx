@@ -1,6 +1,6 @@
 import { Handle, Position } from '@xyflow/react';
-import type { Node, NodeProps } from '@xyflow/react';
-import type { ArchNodeData } from '../../types.ts';
+import type { NodeProps } from '@xyflow/react';
+import type { ArchFlowNode } from '../../types.ts';
 import { getCategoryColors } from '../../types.ts';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -14,10 +14,8 @@ const CATEGORY_ICONS: Record<string, string> = {
   dto: '\u{1F4E6}',
 };
 
-type ArchNodeType = Node<ArchNodeData>;
-
-export function ArchNode({ data, selected }: NodeProps<ArchNodeType>) {
-  const d = data as unknown as ArchNodeData;
+export function ArchNode({ data, selected }: NodeProps<ArchFlowNode>) {
+  const d = data;
   const colors = getCategoryColors(d.category);
   const icon = CATEGORY_ICONS[d.category] ?? '\u{1F4C4}';
 
