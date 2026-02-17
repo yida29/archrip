@@ -2,7 +2,6 @@
 name: commit
 description: diff分析 → 論理的に分割コミット。conventional commitメッセージを自動生成。
 disable-model-invocation: true
-user-invocable: true
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git reset:*), Bash(git commit:*)
 argument-hint: "[message or instructions]"
 ---
