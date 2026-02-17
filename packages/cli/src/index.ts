@@ -56,6 +56,10 @@ Workflow:
 }
 
 main().catch((err: unknown) => {
-  console.error(err);
+  if (err instanceof Error) {
+    console.error(`Error: ${err.message}`);
+  } else {
+    console.error(err);
+  }
   process.exit(1);
 });

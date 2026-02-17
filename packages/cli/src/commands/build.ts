@@ -1,8 +1,53 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync, cpSync } from 'node:fs';
+import { existsSync, writeFileSync, mkdirSync, cpSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
-import { loadAndValidate } from '../utils/validate.js';
+import { loadAndValidate, validateViewerDir } from '../utils/validate.js';
+import type { ArchitectureData } from '../utils/validate.js';
 import { computeLayout } from '../utils/layout.js';
+
+function writeProcessedArchitecture(
+  viewerDir: string,
+  data: ArchitectureData,
+  layoutMap: Record<string, { x: number; y: number }>,
+): void {
+  const viewerPublic = join(viewerDir, 'public');
+  mkdirSync(viewerPublic, { recursive: true });
+
+  const processedData = {
+    ...data,
+    _layout: layoutMap,
+  };
+  writeFileSync(join(viewerPublic, 'architecture.json'), JSON.stringify(processedData, null, 2));
+  console.log('  Wrote public/architecture.json (with layout data)');
+}
+
+function execSyncWithOutput(command: string, cwd: string): void {
+  try {
+    execSync(command, { cwd, stdio: 'pipe' });
+  } catch (err: unknown) {
+    if (err instanceof Error && 'stderr' in err) {
+      const stderr = String((err as NodeJS.ErrnoException & { stderr: Buffer }).stderr).trim();
+      if (stderr) {
+        throw new Error(`Command "${command}" failed:\n${stderr}`);
+      }
+    }
+    throw new Error(`Command "${command}" failed.`);
+  }
+}
+
+function runViewerBuild(viewerDir: string, distDir: string): void {
+  console.log('Installing viewer dependencies...');
+  execSyncWithOutput('npm ci', viewerDir);
+
+  console.log('Building viewer...');
+  execSyncWithOutput('npm run build', viewerDir);
+
+  mkdirSync(distDir, { recursive: true });
+  const viewerDist = join(viewerDir, 'dist');
+  if (existsSync(viewerDist)) {
+    cpSync(viewerDist, distDir, { recursive: true });
+  }
+}
 
 export async function build(): Promise<void> {
   const projectDir = process.cwd();
@@ -15,34 +60,21 @@ export async function build(): Promise<void> {
 
   // 1. Check architecture.json exists
   if (!existsSync(archJsonPath)) {
-    console.error('Error: .archrips/architecture.json not found.');
-    console.error('Run `npx archrips init .` first, then use /archrips-scan to generate data.');
-    process.exit(1);
+    throw new Error(
+      '.archrips/architecture.json not found.\n'
+      + 'Run `npx archrips init .` first, then use /archrips-scan to generate data.',
+    );
   }
 
   // 2. Check viewer exists and verify it was created by archrips init
-  if (!existsSync(viewerDir)) {
-    console.error('Error: .archrips/viewer/ not found.');
-    console.error('Run `npx archrips init .` to set up the viewer.');
-    process.exit(1);
-  }
-  const markerPath = join(viewerDir, '.archrips-viewer');
-  if (!existsSync(markerPath) || readFileSync(markerPath, 'utf-8').trim() !== 'archrips-official-viewer') {
-    console.error('Error: .archrips/viewer/ does not appear to be an official archrips viewer.');
-    console.error('This is a safety check to prevent executing untrusted code.');
-    console.error('Re-run `npx archrips init .` to reinstall the viewer.');
-    process.exit(1);
-  }
+  validateViewerDir(viewerDir);
 
   // 3. Validate architecture.json
   console.log('Validating architecture.json...');
   const { data, errors } = loadAndValidate(archJsonPath);
   if (errors.length > 0) {
-    console.error('Validation errors:');
-    for (const err of errors) {
-      console.error(`  - ${err.path}: ${err.message}`);
-    }
-    process.exit(1);
+    const details = errors.map((err) => `  - ${err.path}: ${err.message}`).join('\n');
+    throw new Error(`Validation errors:\n${details}`);
   }
   console.log(`  ${data.nodes.length} nodes, ${data.edges.length} edges, ${data.useCases?.length ?? 0} use cases`);
 
@@ -55,30 +87,10 @@ export async function build(): Promise<void> {
   }
 
   // 5. Write processed data to viewer's public/
-  const viewerPublic = join(viewerDir, 'public');
-  mkdirSync(viewerPublic, { recursive: true });
+  writeProcessedArchitecture(viewerDir, data, layoutMap);
 
-  const processedData = {
-    ...data,
-    _layout: layoutMap,
-  };
-  writeFileSync(join(viewerPublic, 'architecture.json'), JSON.stringify(processedData, null, 2));
-  console.log('  Wrote public/architecture.json (with layout data)');
-
-  // 6. Install viewer dependencies
-  console.log('Installing viewer dependencies...');
-  execSync('npm install', { cwd: viewerDir, stdio: 'pipe' });
-
-  // 7. Build viewer
-  console.log('Building viewer...');
-  execSync('npx vite build', { cwd: viewerDir, stdio: 'pipe' });
-
-  // 8. Copy dist
-  mkdirSync(distDir, { recursive: true });
-  const viewerDist = join(viewerDir, 'dist');
-  if (existsSync(viewerDist)) {
-    cpSync(viewerDist, distDir, { recursive: true });
-  }
+  // 6. Build viewer and copy dist
+  runViewerBuild(viewerDir, distDir);
 
   console.log(`\nBuild complete! Output: .archrips/dist/`);
   console.log('Run `npx archrips serve` to preview.');

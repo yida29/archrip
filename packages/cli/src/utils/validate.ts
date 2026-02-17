@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 export interface ArchitectureData {
   version: string;
@@ -46,6 +47,7 @@ export interface ArchUseCase {
   flow?: string[];
 }
 
+// Keep in sync with packages/viewer/src/types.ts (ColumnSchema, TableSchema)
 export interface ColumnSchema {
   name: string;
   type: string;
@@ -55,6 +57,7 @@ export interface ColumnSchema {
   foreignKey?: { table: string; column: string; onDelete?: string };
 }
 
+// Keep in sync with packages/viewer/src/types.ts (ColumnSchema, TableSchema)
 export interface TableSchema {
   tableName: string;
   columns: ColumnSchema[];
@@ -65,6 +68,66 @@ export interface TableSchema {
 export interface ValidationError {
   path: string;
   message: string;
+}
+
+/**
+ * Verify that the viewer directory was created by `archrips init`.
+ * Checks: existence, symlink rejection, path containment, marker file, package.json name.
+ * Throws if any check fails.
+ */
+export function validateViewerDir(viewerDir: string): void {
+  if (!existsSync(viewerDir)) {
+    throw new Error(
+      '.archrips/viewer/ not found.\nRun `npx archrips init .` to set up the viewer.',
+    );
+  }
+
+  // Reject symlinks — prevent redirection to arbitrary directories
+  if (lstatSync(viewerDir).isSymbolicLink()) {
+    throw new Error(
+      '.archrips/viewer/ is a symbolic link, which is not allowed.\n'
+      + 'This is a safety check to prevent executing code outside the project.\n'
+      + 'Remove the symlink and re-run `npx archrips init .`.',
+    );
+  }
+
+  // Ensure realpath stays within .archrips/
+  const archripsDir = resolve(viewerDir, '..');
+  const realViewerDir = realpathSync(viewerDir);
+  const realArchripsDir = realpathSync(archripsDir);
+  if (!realViewerDir.startsWith(realArchripsDir + '/')) {
+    throw new Error(
+      '.archrips/viewer/ resolves outside of .archrips/.\n'
+      + 'This is a safety check to prevent executing code outside the project.',
+    );
+  }
+
+  // Check marker file
+  const markerPath = join(viewerDir, '.archrips-viewer');
+  if (!existsSync(markerPath) || readFileSync(markerPath, 'utf-8').trim() !== 'archrips-official-viewer') {
+    throw new Error(
+      '.archrips/viewer/ does not appear to be an official archrips viewer.\n'
+      + 'This is a safety check to prevent executing untrusted code.\n'
+      + 'Re-run `npx archrips init .` to reinstall the viewer.',
+    );
+  }
+
+  // Verify package.json identity
+  const pkgJsonPath = join(viewerDir, 'package.json');
+  if (!existsSync(pkgJsonPath)) {
+    throw new Error(
+      '.archrips/viewer/package.json not found.\n'
+      + 'Re-run `npx archrips init .` to reinstall the viewer.',
+    );
+  }
+  const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8')) as Record<string, unknown>;
+  if (pkg.name !== 'archrips-viewer') {
+    throw new Error(
+      '.archrips/viewer/package.json has unexpected name.\n'
+      + 'This is a safety check to prevent executing untrusted code.\n'
+      + 'Re-run `npx archrips init .` to reinstall the viewer.',
+    );
+  }
 }
 
 /**

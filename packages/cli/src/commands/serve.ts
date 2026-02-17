@@ -1,7 +1,8 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 import { build } from './build.js';
+import { validateViewerDir } from '../utils/validate.js';
 
 export async function serve(): Promise<void> {
   const projectDir = process.cwd();
@@ -9,13 +10,7 @@ export async function serve(): Promise<void> {
   const viewerDir = join(projectDir, '.archrips', 'viewer');
 
   // Verify viewer origin before executing anything in that directory
-  const markerPath = join(viewerDir, '.archrips-viewer');
-  if (!existsSync(markerPath) || readFileSync(markerPath, 'utf-8').trim() !== 'archrips-official-viewer') {
-    console.error('Error: .archrips/viewer/ does not appear to be an official archrips viewer.');
-    console.error('This is a safety check to prevent executing untrusted code.');
-    console.error('Re-run `npx archrips init .` to reinstall the viewer.');
-    process.exit(1);
-  }
+  validateViewerDir(viewerDir);
 
   // Auto-build if dist doesn't exist
   if (!existsSync(join(distDir, 'index.html'))) {
@@ -27,11 +22,14 @@ export async function serve(): Promise<void> {
 
   // Use vite preview to serve the built files
   try {
-    execSync('npx vite preview --port 4173 --open', {
+    execSync('npm run preview -- --port 4173 --open', {
       cwd: viewerDir,
       stdio: 'inherit',
     });
-  } catch {
-    // User interrupted with Ctrl+C — that's fine
+  } catch (err: unknown) {
+    // Ctrl+C (SIGINT) → status is null, exit silently
+    if (err instanceof Error && 'status' in err && (err as NodeJS.ErrnoException & { status: number | null }).status !== null) {
+      throw new Error('Failed to start preview server.');
+    }
   }
 }
