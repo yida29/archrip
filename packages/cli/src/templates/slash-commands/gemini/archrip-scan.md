@@ -115,7 +115,7 @@ After writing the file:
 
 ### Node Rules
 - `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, ext-, job-, dto-)
-- `layer`: 0=external, 1=entry points, 2=application logic, 3=abstractions, 4=implementations, 5=data
+- `layer`: integer indicating architectural depth (higher = closer to domain core). Concentric layout places high values at center. Example: 0=external, 1=adapters/infrastructure, 2=controllers/entry points, 3=application services, 4=ports/abstractions, 5=domain models/entities
 - `category`: one of controller, service, port, adapter, model, external, job, dto (or custom)
 - `label`: display name for the node
 - `filePath`: relative from project root

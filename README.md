@@ -120,16 +120,16 @@ The viewer provides a 3-level toggle (Overview / Structure / Detail) to show or 
 
 ### Layers
 
-The `layer` field controls vertical positioning (dagre handles horizontal):
+The `layer` field controls positioning. Higher values = closer to domain core (center in concentric layout, bottom in dagre):
 
 | Layer | Typical Content |
 |-------|----------------|
 | 0 | External services |
-| 1 | Entry points (controllers, routes) |
-| 2 | Application logic (services, jobs, DTOs) |
-| 3 | Abstractions (ports, interfaces) |
-| 4 | Implementations (adapters) |
-| 5 | Data (models, entities) |
+| 1 | Adapters / Infrastructure |
+| 2 | Controllers / Entry points |
+| 3 | Application services |
+| 4 | Ports / Abstractions (interfaces) |
+| 5 | Domain models / Entities |
 
 ### Edge Types
 
