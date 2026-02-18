@@ -31,4 +31,8 @@ If `$ARGUMENTS` is provided, apply the user's requested changes:
 
 Write the updated `.archrip/architecture.json`.
 
+## After Update
+
+After writing the file, run `npx archrip serve` in the terminal to rebuild and preview the updated diagram.
+
 $ARGUMENTS
