@@ -4,7 +4,6 @@ import type { Edge } from '@xyflow/react';
 
 import type { ArchFlowNode, UseCase } from '../types.ts';
 import { useFlowAnimation } from './useFlowAnimation.ts';
-import type { FlowAnimationState } from './useFlowAnimation.ts';
 
 function isNodeActive(node: ArchFlowNode, activeIds: Set<string>): boolean {
   if (node.data.isGroup && node.data.memberNodes) {
