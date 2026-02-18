@@ -22,6 +22,12 @@
         "sourceUrl": {
           "type": "string",
           "description": "URL template for source links. Use {filePath} as placeholder. Example: https://github.com/org/repo/blob/main/{filePath}"
+        },
+        "layout": {
+          "type": "string",
+          "enum": ["dagre", "concentric"],
+          "default": "dagre",
+          "description": "Layout algorithm: 'dagre' (top-to-bottom) or 'concentric' (onion/DDD ring layout)"
         }
       },
       "additionalProperties": false

@@ -1,4 +1,5 @@
 import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs';
+import path from 'node:path';
 import { join, resolve } from 'node:path';
 
 export interface ArchitectureData {
@@ -9,6 +10,7 @@ export interface ArchitectureData {
     language?: string;
     framework?: string;
     sourceUrl?: string;
+    layout?: 'dagre' | 'concentric';
   };
   nodes: ArchNode[];
   edges: ArchEdge[];
@@ -21,6 +23,7 @@ export interface ArchNode {
   category: string;
   label: string;
   description?: string;
+  depth?: number;
   filePath?: string;
   layer: number;
   methods?: string[];
@@ -134,10 +137,11 @@ export function validateViewerDir(viewerDir: string): void {
  * Load and validate architecture.json.
  * Does structural validation without requiring ajv (zero extra dependencies).
  */
-export function loadAndValidate(filePath: string): { data: ArchitectureData; errors: ValidationError[] } {
+export function loadAndValidate(filePath: string): { data: ArchitectureData; errors: ValidationError[]; warnings: ValidationError[] } {
   const raw = readFileSync(filePath, 'utf-8');
   const data = JSON.parse(raw) as ArchitectureData;
   const errors: ValidationError[] = [];
+  const warnings: ValidationError[] = [];
 
   // Required top-level fields
   if (data.version !== '1.0') {
@@ -169,7 +173,11 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
     for (let i = 0; i < data.nodes.length; i++) {
       const node = data.nodes[i]!;
       const prefix = `nodes[${i}]`;
-      if (!node.id) errors.push({ path: `${prefix}.id`, message: 'Required' });
+      if (!node.id) {
+        errors.push({ path: `${prefix}.id`, message: 'Required' });
+      } else if (!/^[a-z][a-z0-9-]*$/.test(node.id)) {
+        errors.push({ path: `${prefix}.id`, message: 'Must be lowercase kebab-case (e.g. "svc-users")' });
+      }
       if (!node.category) errors.push({ path: `${prefix}.category`, message: 'Required' });
       if (!node.label) errors.push({ path: `${prefix}.label`, message: 'Required' });
       if (typeof node.layer !== 'number') {
@@ -177,8 +185,11 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
       } else if (!Number.isInteger(node.layer) || node.layer < 0 || node.layer > 100) {
         errors.push({ path: `${prefix}.layer`, message: 'Must be an integer between 0 and 100' });
       }
+      if (node.depth !== undefined && (node.depth !== 0 && node.depth !== 1 && node.depth !== 2)) {
+        errors.push({ path: `${prefix}.depth`, message: 'Must be 0, 1, or 2' });
+      }
       if (node.filePath) {
-        if (node.filePath.includes('..') || node.filePath.startsWith('/')) {
+        if (path.isAbsolute(node.filePath) || node.filePath.split(/[/\\]/).some(seg => seg === '..')) {
           errors.push({ path: `${prefix}.filePath`, message: 'Must be a relative path without ".." segments' });
         }
       }
@@ -196,6 +207,10 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
       const prefix = `edges[${i}]`;
       if (!edge.source) errors.push({ path: `${prefix}.source`, message: 'Required' });
       if (!edge.target) errors.push({ path: `${prefix}.target`, message: 'Required' });
+      const VALID_EDGE_TYPES = ['dependency', 'implements', 'relation'];
+      if (edge.type !== undefined && !VALID_EDGE_TYPES.includes(edge.type)) {
+        errors.push({ path: `${prefix}.type`, message: `Must be one of: ${VALID_EDGE_TYPES.join(', ')}` });
+      }
       if (edge.source && !nodeIds.has(edge.source)) {
         errors.push({ path: `${prefix}.source`, message: `References unknown node: "${edge.source}"` });
       }
@@ -218,6 +233,23 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
             errors.push({ path: `${prefix}.nodeIds`, message: `References unknown node: "${nodeId}"` });
           }
         }
+      }
+    }
+  }
+
+  // Detect orphan nodes (nodes with no edges) — reported as warnings, not errors
+  if (Array.isArray(data.edges) && Array.isArray(data.nodes)) {
+    const connectedNodes = new Set<string>();
+    for (const edge of data.edges) {
+      if (edge.source) connectedNodes.add(edge.source);
+      if (edge.target) connectedNodes.add(edge.target);
+    }
+    for (const node of data.nodes) {
+      if (node.id && !connectedNodes.has(node.id)) {
+        warnings.push({
+          path: 'nodes',
+          message: `Orphan node "${node.id}" has no edges`,
+        });
       }
     }
   }
@@ -262,7 +294,7 @@ export function loadAndValidate(filePath: string): { data: ArchitectureData; err
     }
   }
 
-  return { data, errors };
+  return { data, errors, warnings };
 }
 
 /**

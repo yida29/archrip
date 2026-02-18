@@ -183,6 +183,37 @@ describe('loadAndValidate', () => {
       );
     });
 
+    it('should reject filePath with nested path traversal', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        nodes: [{ id: 'x', category: 'service', label: 'X', layer: 0, filePath: 'foo/../../bar' }],
+        edges: [],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toContainEqual(
+        expect.objectContaining({ path: 'nodes[0].filePath' }),
+      );
+    });
+
+    it('should accept filePath with double dots in filename', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        nodes: [{ id: 'x', category: 'service', label: 'X', layer: 0, filePath: 'foo..bar/baz.ts' }],
+        edges: [],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should reject filePath with backslash path traversal', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        nodes: [{ id: 'x', category: 'service', label: 'X', layer: 0, filePath: 'foo\\..\\bar' }],
+        edges: [],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toContainEqual(
+        expect.objectContaining({ path: 'nodes[0].filePath' }),
+      );
+    });
+
     it('should reject absolute filePath', () => {
       const filePath = writeArchJson(tmpDir, minimalArchData({
         nodes: [{ id: 'x', category: 'service', label: 'X', layer: 0, filePath: '/etc/passwd' }],
@@ -192,6 +223,61 @@ describe('loadAndValidate', () => {
       expect(errors).toContainEqual(
         expect.objectContaining({ path: 'nodes[0].filePath' }),
       );
+    });
+
+    it('should reject node.id with invalid pattern', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        nodes: [{ id: 'Invalid_ID', category: 'service', label: 'X', layer: 0 }],
+        edges: [],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toContainEqual(
+        expect.objectContaining({ path: 'nodes[0].id', message: expect.stringContaining('kebab-case') }),
+      );
+    });
+
+    it('should accept valid kebab-case node.id', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        nodes: [
+          { id: 'svc-users', category: 'service', label: 'A', layer: 0 },
+          { id: 'b', category: 'model', label: 'B', layer: 1 },
+        ],
+        edges: [{ source: 'svc-users', target: 'b' }],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should reject node.depth outside 0-2 range', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        nodes: [
+          { id: 'a', category: 'service', label: 'A', layer: 0, depth: 5 },
+          { id: 'b', category: 'model', label: 'B', layer: 1 },
+        ],
+        edges: [{ source: 'a', target: 'b' }],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toContainEqual(
+        expect.objectContaining({ path: 'nodes[0].depth', message: 'Must be 0, 1, or 2' }),
+      );
+    });
+
+    it('should accept valid node.depth values', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        nodes: [
+          { id: 'a', category: 'service', label: 'A', layer: 0, depth: 0 },
+          { id: 'b', category: 'model', label: 'B', layer: 1, depth: 2 },
+        ],
+        edges: [{ source: 'a', target: 'b' }],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should accept node without depth (optional)', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData());
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toHaveLength(0);
     });
   });
 
@@ -205,6 +291,32 @@ describe('loadAndValidate', () => {
         expect.objectContaining({ message: expect.stringContaining('unknown') }),
       );
     });
+
+    it('should reject invalid edge.type', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        edges: [{ source: 'a', target: 'b', type: 'invalid' }],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toContainEqual(
+        expect.objectContaining({ path: 'edges[0].type', message: expect.stringContaining('Must be one of') }),
+      );
+    });
+
+    it('should accept valid edge.type values', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        edges: [{ source: 'a', target: 'b', type: 'dependency' }],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should accept edge without type (optional)', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        edges: [{ source: 'a', target: 'b' }],
+      }));
+      const { errors } = loadAndValidate(filePath);
+      expect(errors).toHaveLength(0);
+    });
   });
 
   describe('use case validation', () => {
@@ -216,6 +328,29 @@ describe('loadAndValidate', () => {
       expect(errors).toContainEqual(
         expect.objectContaining({ path: 'useCases[0].nodeIds' }),
       );
+    });
+  });
+
+  describe('orphan node detection', () => {
+    it('should warn about nodes with no edges', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData({
+        nodes: [
+          { id: 'a', category: 'service', label: 'A', layer: 0 },
+          { id: 'b', category: 'model', label: 'B', layer: 1 },
+          { id: 'c', category: 'dto', label: 'C', layer: 2 },
+        ],
+        edges: [{ source: 'a', target: 'b' }],
+      }));
+      const { warnings } = loadAndValidate(filePath);
+      expect(warnings).toContainEqual(
+        expect.objectContaining({ path: 'nodes', message: 'Orphan node "c" has no edges' }),
+      );
+    });
+
+    it('should not warn when all nodes are connected', () => {
+      const filePath = writeArchJson(tmpDir, minimalArchData());
+      const { warnings } = loadAndValidate(filePath);
+      expect(warnings).toHaveLength(0);
     });
   });
 
