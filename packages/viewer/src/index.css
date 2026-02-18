@@ -33,6 +33,7 @@
   --shadow-panel: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   --shadow-node: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-node-selected: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  --shadow-node-flow-active: 0 0 12px 2px rgba(59, 130, 246, 0.5);
 
   /* Category colors (light) */
   --cat-controller-bg: #dbeafe;
@@ -50,6 +51,9 @@
   --cat-model-bg: #fee2e2;
   --cat-model-border: #ef4444;
   --cat-model-text: #991b1b;
+  --cat-database-bg: #fef3c7;
+  --cat-database-border: #d97706;
+  --cat-database-text: #92400e;
   --cat-external-bg: #f3f4f6;
   --cat-external-border: #6b7280;
   --cat-external-text: #374151;
@@ -88,6 +92,7 @@
   --shadow-panel: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
   --shadow-node: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-node-selected: 0 0 0 2px rgba(96, 165, 250, 0.3);
+  --shadow-node-flow-active: 0 0 12px 2px rgba(96, 165, 250, 0.4);
 
   /* Category colors (dark) */
   --cat-controller-bg: #1e293b;
@@ -105,6 +110,9 @@
   --cat-model-bg: #2b1111;
   --cat-model-border: #f87171;
   --cat-model-text: #fca5a5;
+  --cat-database-bg: #2b1f06;
+  --cat-database-border: #fbbf24;
+  --cat-database-text: #fde68a;
   --cat-external-bg: #1e2330;
   --cat-external-border: #9ca3af;
   --cat-external-text: #d1d5db;
@@ -117,6 +125,17 @@
   --cat-fallback-bg: #1c1917;
   --cat-fallback-border: #a8a29e;
   --cat-fallback-text: #d6d3d1;
+}
+
+/* ─── Flow Animation ─── */
+@keyframes dash-flow {
+  to { stroke-dashoffset: -20; }
+}
+.react-flow__edge.flow-edge-active .react-flow__edge-path {
+  stroke: var(--color-interactive-primary) !important;
+  stroke-width: 2.5 !important;
+  stroke-dasharray: 8 4;
+  animation: dash-flow 0.6s linear infinite;
 }
 
 html,

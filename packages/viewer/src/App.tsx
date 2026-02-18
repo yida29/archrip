@@ -31,10 +31,10 @@ const nodeTypes = { archNode: ArchNode, groupNode: GroupNode };
 function AppInner() {
   const { nodes, edges, useCases, projectName, layoutType, loading, error, onNodesChange, onEdgesChange } = useArchitecture();
   const { depthLevel, setDepthLevel, visibleNodes, visibleEdges } = useDepthFilter(nodes, edges, layoutType);
-  const { selectedUseCase, setSelectedUseCase, categories, filteredNodes, filteredEdges } = useUseCaseFilter(visibleNodes, visibleEdges, useCases);
+  const { selectedUseCase, setSelectedUseCase, categories, filteredNodes, filteredEdges, flowInfo } = useUseCaseFilter(visibleNodes, visibleEdges, useCases);
   const [selectedNodeId, setSelectedNodeId] = useQueryState('node', parseAsString.withOptions({ history: 'replace' }));
   const { theme, toggleTheme } = useTheme();
-  const { fitView } = useReactFlow();
+  const { fitView, setCenter, getNodes } = useReactFlow();
 
   const selectedNodeData: ArchNodeData | null = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -120,6 +120,7 @@ function AppInner() {
             useCases={useCases}
             selectedUseCase={selectedUseCase}
             onSelect={handleUseCaseSelect}
+            flowInfo={flowInfo}
           />
         )}
         <DepthFilter depthLevel={depthLevel} onSelect={setDepthLevel} />
