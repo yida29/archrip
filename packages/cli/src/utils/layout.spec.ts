@@ -192,4 +192,103 @@ describe('computeLayout (concentric)', () => {
       expect(Number.isFinite(node.y)).toBe(true);
     }
   });
+
+  it('should place connected nodes closer together within a ring', () => {
+    // Center node connects to A and B but not C.
+    // A and B should be placed closer to each other (near center's angle)
+    // than to C which has no connection to any placed node.
+    const data = makeData({
+      project: { name: 'test', layout: 'concentric' },
+      nodes: [
+        { id: 'center', category: 'model', label: 'Center', layer: 5 },
+        { id: 'a', category: 'service', label: 'A', layer: 3 },
+        { id: 'b', category: 'service', label: 'B', layer: 3 },
+        { id: 'c', category: 'service', label: 'C', layer: 3 },
+        { id: 'd', category: 'service', label: 'D', layer: 3 },
+      ],
+      edges: [
+        { source: 'center', target: 'a' },
+        { source: 'center', target: 'b' },
+        // c and d have no edges to center
+      ],
+    });
+    const result = computeLayout(data);
+
+    const nodeCenter = (n: { x: number; y: number; width: number; height: number }) => ({
+      cx: n.x + n.width / 2,
+      cy: n.y + n.height / 2,
+    });
+
+    const nodeA = result.nodes.find((n) => n.id === 'a')!;
+    const nodeB = result.nodes.find((n) => n.id === 'b')!;
+    const nodeC = result.nodes.find((n) => n.id === 'c')!;
+
+    const posA = nodeCenter(nodeA);
+    const posB = nodeCenter(nodeB);
+    const posC = nodeCenter(nodeC);
+
+    // Distance between connected nodes A and B
+    const distAB = Math.sqrt((posA.cx - posB.cx) ** 2 + (posA.cy - posB.cy) ** 2);
+    // Distance between A (connected) and C (unconnected)
+    const distAC = Math.sqrt((posA.cx - posC.cx) ** 2 + (posA.cy - posC.cy) ** 2);
+
+    // A and B should be adjacent (closer) since they both connect to center
+    expect(distAB).toBeLessThan(distAC);
+  });
+
+  it('should handle nodes with no connections to placed rings', () => {
+    // All nodes on the same ring, no edges — should still place all nodes
+    const data = makeData({
+      project: { name: 'test', layout: 'concentric' },
+      nodes: [
+        { id: 'a', category: 'service', label: 'A', layer: 3 },
+        { id: 'b', category: 'service', label: 'B', layer: 3 },
+        { id: 'c', category: 'service', label: 'C', layer: 3 },
+      ],
+      edges: [],
+    });
+    const result = computeLayout(data);
+    expect(result.nodes).toHaveLength(3);
+    for (const node of result.nodes) {
+      expect(Number.isFinite(node.x)).toBe(true);
+      expect(Number.isFinite(node.y)).toBe(true);
+    }
+  });
+
+  it('should order outer ring nodes near their connected inner ring nodes', () => {
+    // Two inner nodes at opposite sides, outer nodes should cluster near their connections
+    const data = makeData({
+      project: { name: 'test', layout: 'concentric' },
+      nodes: [
+        { id: 'inner1', category: 'model', label: 'Inner1', layer: 5 },
+        { id: 'inner2', category: 'model', label: 'Inner2', layer: 5 },
+        { id: 'outer1', category: 'service', label: 'Outer1', layer: 3 },
+        { id: 'outer2', category: 'service', label: 'Outer2', layer: 3 },
+        { id: 'outer3', category: 'service', label: 'Outer3', layer: 3 },
+        { id: 'outer4', category: 'service', label: 'Outer4', layer: 3 },
+      ],
+      edges: [
+        { source: 'inner1', target: 'outer1' },
+        { source: 'inner1', target: 'outer2' },
+        { source: 'inner2', target: 'outer3' },
+        { source: 'inner2', target: 'outer4' },
+      ],
+    });
+    const result = computeLayout(data);
+
+    const nodeCenter = (n: { x: number; y: number; width: number; height: number }) => ({
+      cx: n.x + n.width / 2,
+      cy: n.y + n.height / 2,
+    });
+
+    const pos = (id: string) => nodeCenter(result.nodes.find((n) => n.id === id)!);
+    const dist = (a: { cx: number; cy: number }, b: { cx: number; cy: number }) =>
+      Math.sqrt((a.cx - b.cx) ** 2 + (a.cy - b.cy) ** 2);
+
+    // outer1 and outer2 (both connected to inner1) should be closer to each other
+    // than outer1 and outer3 (connected to different inner nodes)
+    const d_o1_o2 = dist(pos('outer1'), pos('outer2'));
+    const d_o1_o3 = dist(pos('outer1'), pos('outer3'));
+    expect(d_o1_o2).toBeLessThan(d_o1_o3);
+  });
 });
