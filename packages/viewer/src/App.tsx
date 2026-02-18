@@ -16,13 +16,17 @@ import type { ArchFlowNode, ArchNodeData } from './types.ts';
 import { getCategoryColors } from './types.ts';
 import { ArchNode } from './components/nodes/ArchNode.tsx';
 import { GroupNode } from './components/nodes/GroupNode.tsx';
+import { CommandPalette } from './components/CommandPalette.tsx';
 import { DetailPanel } from './components/DetailPanel.tsx';
 import { UseCaseFilter } from './components/UseCaseFilter.tsx';
 import { DepthFilter } from './components/DepthFilter.tsx';
 import { Legend } from './components/Legend.tsx';
 import { ThemeToggle } from './components/ThemeToggle.tsx';
 import { useArchitecture } from './hooks/useArchitecture.ts';
+import { useCategoryFilter } from './hooks/useCategoryFilter.ts';
+import { useCommandPalette } from './hooks/useCommandPalette.ts';
 import { useDepthFilter } from './hooks/useDepthFilter.ts';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
 import { useUseCaseFilter } from './hooks/useUseCaseFilter.ts';
 import { useTheme } from './hooks/useTheme.ts';
 
@@ -32,6 +36,7 @@ function AppInner() {
   const { nodes, edges, useCases, projectName, layoutType, loading, error, onNodesChange, onEdgesChange } = useArchitecture();
   const { depthLevel, setDepthLevel, visibleNodes, visibleEdges } = useDepthFilter(nodes, edges, layoutType);
   const { selectedUseCase, setSelectedUseCase, categories, filteredNodes, filteredEdges, flowInfo } = useUseCaseFilter(visibleNodes, visibleEdges, useCases);
+  const categoryFilter = useCategoryFilter();
   const [selectedNodeId, setSelectedNodeId] = useQueryState('node', parseAsString.withOptions({ history: 'replace' }));
   const { theme, toggleTheme } = useTheme();
   const { fitView, setCenter, getNodes } = useReactFlow();
@@ -66,6 +71,70 @@ function AppInner() {
     return () => cancelAnimationFrame(id);
   }, [depthLevel, selectedUseCase, fitView]);
 
+  // Auto-center viewport on active flow step
+  useEffect(() => {
+    if (!flowInfo.flowNodeIds || flowInfo.activeStep < 0) return;
+    const activeNodeId = flowInfo.flowNodeIds[flowInfo.activeStep];
+    if (!activeNodeId) return;
+    const rfNodes = getNodes();
+    const target = rfNodes.find((n) => n.id === activeNodeId);
+    if (!target) return;
+    const x = target.position.x + (target.measured?.width ?? 180) / 2;
+    const y = target.position.y + (target.measured?.height ?? 80) / 2;
+    void setCenter(x, y, { zoom: 1.2, duration: 400 });
+  }, [flowInfo.activeStep, flowInfo.flowNodeIds, getNodes, setCenter]);
+
+  // Category filter: dim hidden categories
+  const displayNodes = useMemo(() => {
+    if (categoryFilter.hiddenCategories.size === 0) return filteredNodes;
+    return filteredNodes.map((node) => {
+      if (categoryFilter.hiddenCategories.has(node.data.category)) {
+        return { ...node, style: { ...node.style, opacity: 0.08, transition: 'opacity 0.3s' } };
+      }
+      return node;
+    });
+  }, [filteredNodes, categoryFilter.hiddenCategories]);
+
+  const displayEdges = useMemo(() => {
+    if (categoryFilter.hiddenCategories.size === 0) return filteredEdges;
+    const hiddenNodeIds = new Set<string>();
+    for (const node of filteredNodes) {
+      if (categoryFilter.hiddenCategories.has(node.data.category)) {
+        hiddenNodeIds.add(node.id);
+      }
+    }
+    return filteredEdges.map((edge) => {
+      if (hiddenNodeIds.has(edge.source) || hiddenNodeIds.has(edge.target)) {
+        return {
+          ...edge,
+          style: { ...edge.style, opacity: 0.08, transition: 'opacity 0.3s' },
+          labelStyle: { ...((edge.labelStyle as Record<string, unknown>) ?? {}), opacity: 0 },
+        };
+      }
+      return edge;
+    });
+  }, [filteredEdges, filteredNodes, categoryFilter.hiddenCategories]);
+
+  // Command palette
+  const palette = useCommandPalette(displayNodes, categoryFilter.hiddenCategories);
+
+  const handlePaletteSelect = useCallback((nodeId: string) => {
+    palette.close();
+    void setSelectedNodeId(nodeId);
+  }, [palette, setSelectedNodeId]);
+
+  const handleEscape = useCallback(() => {
+    if (palette.isOpen) { palette.close(); return; }
+    if (selectedNodeId) { void setSelectedNodeId(null); return; }
+    if (selectedUseCase) { void setSelectedUseCase(null); return; }
+  }, [palette, selectedNodeId, setSelectedNodeId, selectedUseCase, setSelectedUseCase]);
+
+  useKeyboardShortcuts({
+    onTogglePalette: palette.toggle,
+    onEscape: handleEscape,
+    isPaletteOpen: palette.isOpen,
+  });
+
   if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center" style={{ color: 'var(--color-content-tertiary)', background: 'var(--color-surface-canvas)' }}>
@@ -88,8 +157,8 @@ function AppInner() {
   return (
     <div className="w-full h-screen relative">
       <ReactFlow
-        nodes={filteredNodes}
-        edges={filteredEdges}
+        nodes={displayNodes}
+        edges={displayEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
@@ -125,7 +194,12 @@ function AppInner() {
         )}
         <DepthFilter depthLevel={depthLevel} onSelect={setDepthLevel} />
       </div>
-      <Legend categories={categories} />
+      <Legend
+        categories={categories}
+        hiddenCategories={categoryFilter.hiddenCategories}
+        onToggleCategory={categoryFilter.toggleCategory}
+        onShowAll={categoryFilter.showAll}
+      />
 
       {/* Title + Theme Toggle */}
       <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
@@ -157,6 +231,19 @@ function AppInner() {
             onUseCaseClick={handleUseCaseClickFromPanel}
           />
         </>
+      )}
+
+      {palette.isOpen && (
+        <CommandPalette
+          query={palette.query}
+          onQueryChange={palette.setQuery}
+          results={palette.results}
+          activeIndex={palette.activeIndex}
+          onMoveUp={palette.moveUp}
+          onMoveDown={palette.moveDown}
+          onSelect={handlePaletteSelect}
+          onClose={palette.close}
+        />
       )}
     </div>
   );
