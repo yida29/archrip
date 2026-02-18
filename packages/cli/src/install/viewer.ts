@@ -10,8 +10,10 @@ export function installViewer(archripDir: string): void {
   const viewerDest = join(archripDir, 'viewer');
 
   if (!existsSync(viewerSrc)) {
-    console.log('  ! Viewer template not found (expected in monorepo). Skipping viewer copy.');
-    return;
+    throw new Error(
+      'Viewer template not found. This is a packaging error.\n'
+      + 'Please reinstall archrip: npm install -g archrip',
+    );
   }
 
   mkdirSync(viewerDest, { recursive: true });

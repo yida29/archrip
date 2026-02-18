@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Copy viewer source into dist/viewer-template/ for CLI distribution.
- * Excludes node_modules, dist, and .tsbuildinfo files.
+ * Excludes node_modules, dist, .tsbuildinfo files, and symlinks.
  */
-import { cpSync, existsSync } from 'node:fs';
+import { cpSync, existsSync, lstatSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +19,8 @@ if (!existsSync(viewerSrc)) {
 cpSync(viewerSrc, viewerDest, {
   recursive: true,
   filter: (src) => {
+    // Reject symlinks to prevent including unexpected files
+    if (lstatSync(src).isSymbolicLink()) return false;
     const name = src.split('/').pop();
     return name !== 'node_modules' && name !== 'dist' && !name?.endsWith('.tsbuildinfo');
   },

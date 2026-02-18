@@ -27,19 +27,22 @@ function execSyncWithOutput(command: string, cwd: string): void {
   try {
     execSync(command, { cwd, stdio: 'pipe' });
   } catch (err: unknown) {
-    if (err instanceof Error && 'stderr' in err) {
-      const stderr = String((err as NodeJS.ErrnoException & { stderr: Buffer }).stderr).trim();
-      if (stderr) {
-        throw new Error(`Command "${command}" failed:\n${stderr}`);
+    if (err instanceof Error && 'stdout' in err && 'stderr' in err) {
+      const typedErr = err as Error & { stdout: Buffer; stderr: Buffer };
+      const stderr = String(typedErr.stderr).trim();
+      const stdout = String(typedErr.stdout).trim();
+      const output = [stderr, stdout].filter(Boolean).join('\n');
+      if (output) {
+        throw new Error(`Command "${command}" failed:\n${output}`, { cause: err });
       }
     }
-    throw new Error(`Command "${command}" failed.`);
+    throw new Error(`Command "${command}" failed.`, { cause: err });
   }
 }
 
 function runViewerBuild(viewerDir: string, distDir: string): void {
   console.log('Installing viewer dependencies...');
-  execSyncWithOutput('npm ci', viewerDir);
+  execSyncWithOutput('npm ci --ignore-scripts', viewerDir);
 
   console.log('Building viewer...');
   execSyncWithOutput('npm run build', viewerDir);
