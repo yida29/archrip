@@ -79,7 +79,7 @@ Create `.archrip/` directory if it doesn't exist, then write the complete `.arch
 
 After writing the file, tell the developer:
 - Run `npx archrip build && npx archrip serve` to build and preview (viewer is auto-installed on first build)
-- Run `/archrip-refine` to make further adjustments (add/remove nodes, fix relationships, etc.)
+- Run `/archrip-update` to make further adjustments (add/remove nodes, fix relationships, etc.)
 
 ### Required structure (use EXACTLY these field names)
 

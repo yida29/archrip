@@ -1,13 +1,17 @@
 ---
 name: archrip-update
-description: Update architecture diagram after code changes
+description: Update or refine the architecture diagram
 user-invocable: true
-argument-hint: "[scope or instructions]"
+argument-hint: "[changes or instructions]"
 ---
 
-# archrip update — Incremental architecture update
+# archrip update — Update architecture diagram
 
-Update `.archrip/architecture.json` based on recent code changes.
+Read `.archrip/architecture.json` and update it.
+
+## Mode 1: Auto-detect from git diff (no arguments)
+
+If `$ARGUMENTS` is empty:
 
 1. Run `git diff --name-only HEAD~10` to find changed files
 2. Read the current `.archrip/architecture.json`
@@ -17,5 +21,17 @@ Update `.archrip/architecture.json` based on recent code changes.
    - Changed dependencies? → Update edges
 4. Preserve existing node IDs for unchanged components
 5. Write updated `.archrip/architecture.json`
+
+## Mode 2: Apply requested changes (with arguments)
+
+If `$ARGUMENTS` is provided, apply the user's requested changes:
+- Add/remove/modify nodes
+- Fix relationships
+- Add/modify use cases
+- Adjust layer assignments
+- Add database schemas
+- Improve descriptions
+
+Write the updated `.archrip/architecture.json`.
 
 $ARGUMENTS

@@ -12,7 +12,7 @@ archrip lets Claude Code analyze your codebase and produce a self-contained, int
 /plugin install archrip@archrip
 
 # 2. Scan the codebase
-/archrip:scan
+/archrip-scan
 
 # 3. Build & preview
 npx archrip build
@@ -22,7 +22,7 @@ npx archrip serve
 ## How It Works
 
 1. **Install plugin** — `/plugin marketplace add yida29/archrip` registers the plugin, `/plugin install archrip@archrip` installs it
-2. **`/archrip:scan`** — Claude reads your codebase and docs, asks you to review the draft, then generates `.archrip/architecture.json`
+2. **`/archrip-scan`** — Claude reads your codebase and docs, asks you to review the draft, then generates `.archrip/architecture.json`
 3. **`archrip build`** — validates the JSON, auto-installs the viewer if needed, computes layout with dagre, and builds a static React Flow viewer
 4. **`archrip serve`** — serves the built HTML locally for preview
 
@@ -32,9 +32,8 @@ The output is a standalone `dist/` folder you can deploy to GitHub Pages, Netlif
 
 | Skill | Description |
 |-------|-------------|
-| `/archrip:scan` | Full codebase scan — reads code & docs, presents draft for review, generates `architecture.json` |
-| `/archrip:update` | Incremental update based on `git diff` |
-| `/archrip:refine` | Interactive refinement (add/remove/modify nodes) |
+| `/archrip-scan` | Full codebase scan — reads code & docs, presents draft for review, generates `architecture.json` |
+| `/archrip-update` | Update or refine the diagram — auto-detects changes from git diff, or apply manual edits |
 
 ## CLI Commands
 
