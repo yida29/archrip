@@ -4,8 +4,8 @@ export type DepthLevel = 0 | 1 | 2;
 
 const CATEGORY_DEPTH: Record<string, DepthLevel> = {
   controller: 0, external: 0,
-  service: 1, port: 1, adapter: 1, job: 1,
-  model: 2, dto: 2,
+  service: 1, port: 1, job: 1,
+  adapter: 2, model: 2, dto: 2,
 };
 
 export function getDefaultDepth(category: string): DepthLevel {
