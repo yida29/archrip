@@ -1,5 +1,5 @@
 ---
-name: refine
+name: archrip-refine
 description: Interactively refine the architecture diagram
 user-invocable: true
 argument-hint: "[changes to apply]"

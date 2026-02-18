@@ -1,5 +1,5 @@
 ---
-name: update
+name: archrip-update
 description: Update architecture diagram after code changes
 user-invocable: true
 argument-hint: "[scope or instructions]"
