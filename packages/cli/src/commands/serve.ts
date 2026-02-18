@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 import { build } from './build.js';
@@ -6,14 +5,10 @@ import { validateViewerDir } from '../utils/validate.js';
 
 export async function serve(): Promise<void> {
   const projectDir = process.cwd();
-  const distDir = join(projectDir, '.archrip', 'dist');
   const viewerDir = join(projectDir, '.archrip', 'viewer');
 
-  // Auto-build if dist doesn't exist (build auto-installs viewer if needed)
-  if (!existsSync(join(distDir, 'index.html'))) {
-    console.log('No build found. Running build first...\n');
-    await build();
-  }
+  // Always rebuild to ensure layout reflects latest architecture.json
+  await build();
 
   // Verify viewer origin before executing anything in that directory
   validateViewerDir(viewerDir);
