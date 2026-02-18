@@ -27,6 +27,7 @@ If `$ARGUMENTS` is provided, apply the user's requested changes:
 - Add/modify use cases
 - Adjust layer assignments
 - Add database schemas
+- Add/modify metadata entries
 - Improve descriptions
 
 Write the updated `.archrip/architecture.json`.

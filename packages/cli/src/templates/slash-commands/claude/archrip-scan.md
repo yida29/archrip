@@ -136,11 +136,21 @@ After writing the file:
 - `filePath`: relative from project root
 - `depth` (optional): 0=overview, 1=structure, 2=detail. Auto-inferred from `layer` if omitted: with 3+ unique layers, lowest → 0, middle → 1, highest → 2. With 1-2 layers, all nodes get depth 0 (always visible).
 - `useCases`: array of use case IDs this node participates in
+- `metadata` (optional): array of `{ label, value, type? }` entries for supplementary info (AWS ARNs, doc links, SLA notes, etc.). `type` is `text` (default), `code`, `link`, or `list`. `value` is a string, or `string[]` when `type` is `list`. Example:
+  ```json
+  "metadata": [
+    { "label": "Lambda ARN", "value": "arn:aws:lambda:ap-northeast-1:123:function:auth", "type": "code" },
+    { "label": "API Docs", "value": "https://docs.example.com/auth", "type": "link" },
+    { "label": "SLA", "value": ["99.9% uptime", "p95 < 200ms"], "type": "list" }
+  ]
+  ```
 
 ### Edge Rules
 - `source`: source node id
 - `target`: target node id
 - `type`: dependency | implements | relation
+- `description` (optional): human-readable description of the edge's purpose
+- `metadata` (optional): same format as node metadata — array of `{ label, value, type? }` entries
 - Only include significant architectural dependencies (not utility imports)
 - **Every node MUST have at least one edge.** If a node has no obvious dependency, connect it with a `relation` edge to the component that uses or contains it.
 
