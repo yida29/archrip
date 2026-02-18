@@ -6,6 +6,5 @@
   "homepage": "https://github.com/yida29/archrip",
   "repository": "https://github.com/yida29/archrip",
   "license": "MIT",
-  "keywords": ["architecture", "diagrams", "code-analysis", "visualization"],
-  "skills": "./skills/"
+  "keywords": ["architecture", "diagrams", "code-analysis", "visualization"]
 }
