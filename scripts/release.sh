@@ -8,8 +8,21 @@ BUMP="${1:-patch}"
 
 # 1. Bump version in packages/cli/package.json (source of truth)
 cd "$(git rev-parse --show-toplevel)"
-npm version "$BUMP" --no-git-tag-version -w packages/cli
-VERSION=$(node -p "require('./packages/cli/package.json').version")
+CURRENT=$(node -p "require('./packages/cli/package.json').version")
+# Dry-run to preview next version
+NEXT=$(cd packages/cli && npm version "$BUMP" --no-git-tag-version && node -p "require('./package.json').version")
+# Restore to current before confirmation
+npm version "$CURRENT" --no-git-tag-version --allow-same-version -w packages/cli > /dev/null
+
+echo "Release: v${CURRENT} → v${NEXT} (${BUMP})"
+read -r -p "Proceed? [y/N] " confirm
+if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+  echo "Aborted."
+  exit 1
+fi
+
+npm version "$BUMP" --no-git-tag-version -w packages/cli > /dev/null
+VERSION="$NEXT"
 
 # 2. Sync to .claude-plugin/plugin.json and marketplace.json
 node -e "
