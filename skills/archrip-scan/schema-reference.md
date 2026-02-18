@@ -24,9 +24,9 @@
 - UseCase: `id`, `name`, `nodeIds` — all required
 
 ## Node Rules
-- `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, ext-, job-, dto-)
+- `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, db-, ext-, job-, dto-)
 - `layer`: 0=external, 1=entry points, 2=application logic, 3=abstractions, 4=implementations, 5=data
-- `category`: one of controller, service, port, adapter, model, external, job, dto (or custom)
+- `category`: one of controller, service, port, adapter, model, database, external, job, dto (or custom). Use `model` for domain entities/value objects (core business logic). Use `database` for DB tables, migrations, ORMs, and infrastructure persistence.
 - `label`: display name for the node
 - `filePath`: relative from project root
 - `depth` (optional): 0=overview (boundary), 1=structure (internal), 2=detail (implementation). Auto-inferred from category if omitted

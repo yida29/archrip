@@ -57,7 +57,8 @@ For each component, identify:
 **Connectivity check:** After mapping, verify every node has at least one edge. If a node is orphaned:
 - DTOs/entities → connect to the service or adapter that references them
 - External services → connect to the adapter/controller that integrates with them
-- Models → connect to the adapter/repository that queries them
+- Entities (model) → connect to the repository/adapter that references them
+- Database nodes → connect to the adapter/repository that queries them
 
 ## Phase 6: Identify Use Cases
 Group related components into user-facing features.

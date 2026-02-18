@@ -125,8 +125,9 @@ const CATEGORY_RING_PRIORITY: Record<string, number> = {
   dto: 3,
   controller: 4,
   adapter: 5,
-  job: 6,
-  external: 7,
+  database: 6,
+  job: 7,
+  external: 8,
 };
 
 const DEFAULT_RING_PRIORITY = 4;

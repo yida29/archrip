@@ -129,9 +129,9 @@ After writing the file:
 - UseCase: `id`, `name`, `nodeIds` — all required
 
 ### Node Rules
-- `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, ext-, job-, dto-)
+- `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, db-, ext-, job-, dto-)
 - `layer`: non-negative integer. **Higher = closer to domain core / more stable. Lower = closer to external world / more volatile.** Dagre (TB) places higher layers lower on screen; concentric places them at center. Use as many layers as the architecture requires (typically 3-6). Example for DDD: 0=external, 1=adapters, 2=controllers, 3=app services, 4=ports, 5=domain entities. Example for MVC: 0=external, 1=controllers, 2=services, 3=models.
-- `category`: one of controller, service, port, adapter, model, external, job, dto (or custom)
+- `category`: one of controller, service, port, adapter, model, database, external, job, dto (or custom). Use `model` for domain entities/value objects (core business logic). Use `database` for DB tables, migrations, ORMs, and infrastructure persistence.
 - `label`: display name for the node
 - `filePath`: relative from project root
 - `depth` (optional): 0=overview, 1=structure, 2=detail. Auto-inferred from `layer` if omitted: with 3+ unique layers, lowest → 0, middle → 1, highest → 2. With 1-2 layers, all nodes get depth 0 (always visible).

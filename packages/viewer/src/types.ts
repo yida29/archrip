@@ -62,7 +62,8 @@ const CATEGORY_META = {
   service:    { label: 'Service',    icon: '\u{2699}\u{FE0F}', color: { bg: '#dcfce7', border: '#22c55e', text: '#166534' } },
   port:       { label: 'Port',       icon: '\u{1F50C}', color: { bg: '#ede9fe', border: '#8b5cf6', text: '#5b21b6' } },
   adapter:    { label: 'Adapter',    icon: '\u{1F527}', color: { bg: '#ffedd5', border: '#f97316', text: '#9a3412' } },
-  model:      { label: 'Model / DB', icon: '\u{1F4BE}', color: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' } },
+  model:      { label: 'Entity',     icon: '\u{1F4BE}', color: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' } },
+  database:   { label: 'DB / Infra', icon: '\u{1F5C4}\u{FE0F}', color: { bg: '#fef3c7', border: '#d97706', text: '#92400e' } },
   external:   { label: 'External',   icon: '\u{2601}\u{FE0F}', color: { bg: '#f3f4f6', border: '#6b7280', text: '#374151' } },
   job:        { label: 'Job',        icon: '\u{23F0}', color: { bg: '#fef9c3', border: '#eab308', text: '#854d0e' } },
   dto:        { label: 'DTO',        icon: '\u{1F4E6}', color: { bg: '#cffafe', border: '#06b6d4', text: '#155e75' } },
@@ -76,7 +77,7 @@ function getMeta(category: string): CategoryMeta {
   return CATEGORY_META[category as StandardCategory] ?? FALLBACK_META;
 }
 
-const STANDARD_CATEGORIES = ['controller', 'service', 'port', 'adapter', 'model', 'external', 'job', 'dto'] as const;
+const STANDARD_CATEGORIES = ['controller', 'service', 'port', 'adapter', 'model', 'database', 'external', 'job', 'dto'] as const;
 
 export function getCategoryColors(category: string): CategoryStyle {
   const key = (STANDARD_CATEGORIES as readonly string[]).includes(category) ? category : 'fallback';
