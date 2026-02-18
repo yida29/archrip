@@ -1,6 +1,8 @@
 {
   "name": "archrip",
-  "owner": { "name": "Yuto Ida" },
+  "owner": {
+    "name": "Yuto Ida"
+  },
   "metadata": {
     "description": "Architecture diagram generation tools"
   },
@@ -9,11 +11,17 @@
       "name": "archrip",
       "source": "./",
       "description": "Generate interactive architecture diagrams from your codebase",
-      "version": "0.1.2",
-      "author": { "name": "Yuto Ida" },
+      "version": "0.1.3",
+      "author": {
+        "name": "Yuto Ida"
+      },
       "homepage": "https://github.com/yida29/archrip",
       "license": "MIT",
-      "keywords": ["architecture", "diagrams", "visualization"],
+      "keywords": [
+        "architecture",
+        "diagrams",
+        "visualization"
+      ],
       "category": "development"
     }
   ]
