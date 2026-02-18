@@ -39,14 +39,14 @@ Based on the framework, identify architectural layers:
 
 **Common patterns** (→ means "depends on / closer to domain core"):
 MVC / Layered:
-- Laravel: External → Controllers → Services → Models
-- Express/NestJS: External → Routes/Controllers → Services → Repositories → Models
+- Laravel: External → Controllers → Services → Domain
+- Express/NestJS: External → Routes/Controllers → Services → Repositories → Domain
 - Next.js: External → Pages → Components → Hooks/API Routes → Services
-- Django: External → Views → Serializers → Services → Models
-- Spring Boot: External → Controllers → Services → Repositories → Entities
+- Django: External → Views → Serializers → Services → Domain
+- Spring Boot: External → Controllers → Services → Repositories → Domain
 
 DDD / Port & Adapter / Hexagonal:
-- Generic: External → Adapters(Controllers, DB impl) → Application Services → Ports(interfaces) → Domain Entities
+- Generic: External → Adapters(Controllers, DB impl) → Application Services → Ports(interfaces) → Domain
 - Note: Ports are interfaces **defined by the domain** — they belong inside, near domain core. Adapters implement Ports from the outside.
 
 For unlisted frameworks: group by directory responsibility.

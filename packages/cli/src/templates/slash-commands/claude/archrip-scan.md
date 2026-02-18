@@ -39,18 +39,18 @@ Both layouts use this value — dagre places higher layers lower on screen, conc
 **Reference mappings** (layer numbers in parentheses — adapt to actual project structure):
 
 MVC / Layered:
-- Laravel: External(0) → Controllers(1) → Services(2) → Models(3)
-- Rails: External(0) → Controllers(1) → Services(2) → Models(3)
-- Django: External(0) → Views(1) → Serializers(2) → Services(3) → Models(4)
-- Spring Boot: External(0) → Controllers(1) → Services(2) → Repositories(3) → Entities(4)
-- NestJS: External(0) → Controllers(1) → Services(2) → Repositories(3) → Entities(4)
+- Laravel: External(0) → Controllers(1) → Services(2) → Domain(3)
+- Rails: External(0) → Controllers(1) → Services(2) → Domain(3)
+- Django: External(0) → Views(1) → Serializers(2) → Services(3) → Domain(4)
+- Spring Boot: External(0) → Controllers(1) → Services(2) → Repositories(3) → Domain(4)
+- NestJS: External(0) → Controllers(1) → Services(2) → Repositories(3) → Domain(4)
 - Next.js App Router: External(0) → Route Handlers/Pages(1) → Components(2) → Hooks/Services(3) → Data Access(4)
-- FastAPI: External(0) → Routers(1) → Services(2) → Repositories(3) → Models(4)
+- FastAPI: External(0) → Routers(1) → Services(2) → Repositories(3) → Domain(4)
 
 DDD / Clean Architecture / Hexagonal (use `"layout": "concentric"`):
-- Generic: External(0) → Adapters(1) [Controllers, DB impl, API clients] → Application Services(2) → Ports(3) [domain-defined interfaces] → Domain Entities(4)
+- Generic: External(0) → Adapters(1) [Controllers, DB impl, API clients] → Application Services(2) → Ports(3) [domain-defined interfaces] → Domain(4)
 - Go (Hex): External(0) → Adapters(1) [Handlers, Repositories] → Use Cases(2) → Ports(3) → Domain(4)
-- Flutter (Clean): External(0) → Data Sources(1) → Repositories(2) → Use Cases(3) → Entities(4)
+- Flutter (Clean): External(0) → Data Sources(1) → Repositories(2) → Use Cases(3) → Domain(4)
 - Note: Ports are interfaces **defined by the domain** — they belong near domain core, not at the adapter layer. Adapters implement/use Ports from the outside.
 
 Serverless / Microservices:
@@ -153,7 +153,7 @@ After writing the file:
 
 ### Node Rules
 - `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, db-, ext-, job-, dto-)
-- `layer`: non-negative integer. **Higher = closer to domain core / more stable. Lower = closer to external world / more volatile.** Dagre (TB) places higher layers lower on screen; concentric places them at center. Use as many layers as the architecture requires (typically 3-6). Example for DDD: 0=external, 1=adapters (controllers + infra), 2=app services, 3=ports, 4=domain entities. Example for MVC: 0=external, 1=controllers, 2=services, 3=models.
+- `layer`: non-negative integer. **Higher = closer to domain core / more stable. Lower = closer to external world / more volatile.** Dagre (TB) places higher layers lower on screen; concentric places them at center. Use as many layers as the architecture requires (typically 3-6). Example for DDD: 0=external, 1=adapters (controllers + infra), 2=app services, 3=ports, 4=domain. Example for MVC: 0=external, 1=controllers, 2=services, 3=domain.
 - `category`: one of controller, service, port, adapter, model, database, external, job, dto (or custom). Use `model` for domain entities/value objects (core business logic). Use `database` for DB tables, migrations, ORMs, and infrastructure persistence.
 - `label`: display name for the node
 - `description`: 1-3 sentences explaining responsibility + business context. Do NOT just echo the label. Cross-reference documentation for richer context (see Description Guidelines below)
