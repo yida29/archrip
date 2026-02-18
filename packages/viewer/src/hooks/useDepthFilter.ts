@@ -166,6 +166,7 @@ export function useDepthFilter(
       width: n.data.isGroup ? GROUP_NODE_WIDTH : NODE_WIDTH,
       height: n.data.isGroup ? GROUP_NODE_HEIGHT : NODE_HEIGHT,
       layer: n.data.layer,
+      category: n.data.category,
     }));
 
     const layoutEdges = remappedEdges.map((e) => ({

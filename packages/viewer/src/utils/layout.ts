@@ -5,6 +5,7 @@ interface LayoutNode {
   width: number;
   height: number;
   layer?: number;
+  category?: string;
 }
 
 interface LayoutEdge {
@@ -113,33 +114,55 @@ function circularMean(angles: number[]): number {
   return Math.atan2(sinSum / angles.length, cosSum / angles.length);
 }
 
+/**
+ * Category-based ring priority for concentric layout.
+ * Lower number = closer to center (domain core).
+ */
+const CATEGORY_RING_PRIORITY: Record<string, number> = {
+  model: 0,
+  port: 1,
+  service: 2,
+  dto: 3,
+  controller: 4,
+  adapter: 5,
+  job: 6,
+  external: 7,
+};
+
+const DEFAULT_RING_PRIORITY = 4;
+
+function computeRingKey(category: string, layer: number): number {
+  const priority = CATEGORY_RING_PRIORITY[category] ?? DEFAULT_RING_PRIORITY;
+  return priority * 1000 - layer;
+}
+
 function computeConcentricLayout(
   nodes: LayoutNode[],
   edges: LayoutEdge[],
 ): Map<string, { x: number; y: number }> {
   const result = new Map<string, { x: number; y: number }>();
 
-  // Group nodes by layer
-  const layerGroups = new Map<number, LayoutNode[]>();
+  // Group nodes by ring key (category-aware)
+  const ringGroups = new Map<number, LayoutNode[]>();
   for (const node of nodes) {
-    const layer = node.layer ?? 0;
-    const group = layerGroups.get(layer);
+    const ringKey = computeRingKey(node.category ?? '', node.layer ?? 0);
+    const group = ringGroups.get(ringKey);
     if (group) {
       group.push(node);
     } else {
-      layerGroups.set(layer, [node]);
+      ringGroups.set(ringKey, [node]);
     }
   }
 
-  // Sort layers descending: highest layer = ring 0 (center)
-  const sortedLayers = [...layerGroups.keys()].sort((a, b) => b - a);
+  // Sort ring keys ascending: lowest key = ring 0 (center)
+  const sortedRingKeys = [...ringGroups.keys()].sort((a, b) => a - b);
 
   const adjacency = buildAdjacencyMap(edges);
   const placedAngles = new Map<string, number>();
 
-  for (let ringIndex = 0; ringIndex < sortedLayers.length; ringIndex++) {
-    const layer = sortedLayers[ringIndex]!;
-    const ringNodes = layerGroups.get(layer)!;
+  for (let ringIndex = 0; ringIndex < sortedRingKeys.length; ringIndex++) {
+    const ringKey = sortedRingKeys[ringIndex]!;
+    const ringNodes = ringGroups.get(ringKey)!;
     const count = ringNodes.length;
 
     if (ringIndex === 0 && count === 1) {

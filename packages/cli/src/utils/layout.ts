@@ -122,9 +122,39 @@ function circularMean(angles: number[]): number {
 }
 
 /**
+ * Category-based ring priority for concentric layout.
+ * Lower number = closer to center (domain core).
+ * This ensures correct ring placement even when LLMs assign incorrect layer numbers.
+ */
+const CATEGORY_RING_PRIORITY: Record<string, number> = {
+  model: 0,
+  port: 1,
+  service: 2,
+  dto: 3,
+  controller: 4,
+  adapter: 5,
+  job: 6,
+  external: 7,
+};
+
+const DEFAULT_RING_PRIORITY = 4; // unknown categories treated as controller-level
+
+/**
+ * Compute the ring key for a node. Combines category priority (primary)
+ * with inverted layer (secondary) so that within the same category priority,
+ * higher layers are still placed closer to center.
+ */
+function computeRingKey(category: string, layer: number): number {
+  const priority = CATEGORY_RING_PRIORITY[category] ?? DEFAULT_RING_PRIORITY;
+  // Encode: priority * 1000 - layer (so higher layers within same priority → lower key → closer to center)
+  return priority * 1000 - layer;
+}
+
+/**
  * Concentric (onion) layout for DDD/Clean Architecture.
- * High layer values (domain entities) are placed at the center,
- * low layer values (external) are placed on the outer rings.
+ * Uses category semantics as the primary ring assignment:
+ * model/domain at center, external/adapter on outer rings.
+ * Layer values serve as secondary sort within the same category ring.
  *
  * Nodes within each ring are ordered using barycenter heuristic:
  * each node is assigned a target angle based on the circular mean
@@ -136,19 +166,22 @@ function computeConcentricLayout(data: ArchitectureData): LayoutResult {
     return { nodes: [] };
   }
 
-  // Group nodes by layer
-  const layerGroups = new Map<number, string[]>();
+  // Group nodes by ring key (category-aware)
+  const ringGroups = new Map<number, string[]>();
+  const nodeRingKeys = new Map<string, number>();
   for (const node of data.nodes) {
-    const group = layerGroups.get(node.layer);
+    const ringKey = computeRingKey(node.category, node.layer);
+    nodeRingKeys.set(node.id, ringKey);
+    const group = ringGroups.get(ringKey);
     if (group) {
       group.push(node.id);
     } else {
-      layerGroups.set(node.layer, [node.id]);
+      ringGroups.set(ringKey, [node.id]);
     }
   }
 
-  // Sort layers descending: highest layer = ring 0 (center)
-  const sortedLayers = [...layerGroups.keys()].sort((a, b) => b - a);
+  // Sort ring keys ascending: lowest key = ring 0 (center)
+  const sortedRingKeys = [...ringGroups.keys()].sort((a, b) => a - b);
 
   // Build adjacency map for edge-aware ordering
   const adjacency = buildAdjacencyMap(data.edges);
@@ -156,9 +189,9 @@ function computeConcentricLayout(data: ArchitectureData): LayoutResult {
   const nodes: LayoutNode[] = [];
   const placedAngles = new Map<string, number>();
 
-  for (let ringIndex = 0; ringIndex < sortedLayers.length; ringIndex++) {
-    const layer = sortedLayers[ringIndex]!;
-    const nodeIds = layerGroups.get(layer)!;
+  for (let ringIndex = 0; ringIndex < sortedRingKeys.length; ringIndex++) {
+    const ringKey = sortedRingKeys[ringIndex]!;
+    const nodeIds = ringGroups.get(ringKey)!;
     const count = nodeIds.length;
 
     if (ringIndex === 0 && count === 1) {

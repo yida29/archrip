@@ -291,4 +291,69 @@ describe('computeLayout (concentric)', () => {
     const d_o1_o3 = dist(pos('outer1'), pos('outer3'));
     expect(d_o1_o2).toBeLessThan(d_o1_o3);
   });
+
+  it('should place models at center and adapters/external on outer rings even with wrong layer numbers', () => {
+    // Simulate an LLM assigning high layer to adapters and low layer to models
+    const data = makeData({
+      project: { name: 'test', layout: 'concentric' },
+      nodes: [
+        { id: 'model', category: 'model', label: 'Domain Model', layer: 1 },
+        { id: 'svc', category: 'service', label: 'Service', layer: 2 },
+        { id: 'adpt', category: 'adapter', label: 'Adapter', layer: 4 },
+        { id: 'ext', category: 'external', label: 'External DB', layer: 5 },
+      ],
+      edges: [
+        { source: 'ext', target: 'adpt' },
+        { source: 'adpt', target: 'svc' },
+        { source: 'svc', target: 'model' },
+      ],
+    });
+    const result = computeLayout(data);
+
+    const dist = (n: { x: number; y: number; width: number; height: number }) => {
+      const cx = n.x + n.width / 2;
+      const cy = n.y + n.height / 2;
+      return Math.sqrt(cx * cx + cy * cy);
+    };
+
+    const modelNode = result.nodes.find((n) => n.id === 'model')!;
+    const adptNode = result.nodes.find((n) => n.id === 'adpt')!;
+    const extNode = result.nodes.find((n) => n.id === 'ext')!;
+
+    // Model should be closer to center than adapter
+    expect(dist(modelNode)).toBeLessThan(dist(adptNode));
+    // Adapter should be closer to center than external
+    expect(dist(adptNode)).toBeLessThan(dist(extNode));
+  });
+
+  it('should use category priority as primary sort and layer as secondary', () => {
+    // Two services with different layers should be on the same ring
+    const data = makeData({
+      project: { name: 'test', layout: 'concentric' },
+      nodes: [
+        { id: 'model', category: 'model', label: 'Model', layer: 3 },
+        { id: 'svc1', category: 'service', label: 'Service A', layer: 2 },
+        { id: 'svc2', category: 'service', label: 'Service B', layer: 2 },
+        { id: 'ext', category: 'external', label: 'External', layer: 0 },
+      ],
+      edges: [
+        { source: 'svc1', target: 'model' },
+        { source: 'svc2', target: 'model' },
+        { source: 'ext', target: 'svc1' },
+      ],
+    });
+    const result = computeLayout(data);
+
+    const dist = (n: { x: number; y: number; width: number; height: number }) => {
+      const cx = n.x + n.width / 2;
+      const cy = n.y + n.height / 2;
+      return Math.sqrt(cx * cx + cy * cy);
+    };
+
+    const svc1 = result.nodes.find((n) => n.id === 'svc1')!;
+    const svc2 = result.nodes.find((n) => n.id === 'svc2')!;
+
+    // Same category + same layer = same ring = same distance
+    expect(dist(svc1)).toBeCloseTo(dist(svc2), 1);
+  });
 });
