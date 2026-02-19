@@ -1,8 +1,5 @@
 ---
-name: archrip-update
 description: Update or refine the architecture diagram
-user-invocable: true
-argument-hint: "[changes or instructions]"
 ---
 
 # archrip update — Update architecture diagram

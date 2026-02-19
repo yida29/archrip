@@ -1,8 +1,5 @@
 ---
-name: archrip-scan
 description: Scan codebase and generate architecture diagram data
-user-invocable: true
-argument-hint: "[directory or instructions]"
 ---
 
 # archrip scan — Analyze codebase architecture
@@ -36,6 +33,8 @@ Read existing documentation to understand architecture context:
 
 ## Phase 3: Layer Identification
 Assign each component a `layer` integer. The rule: **higher layer = closer to domain core (more stable, fewer external dependencies). Lower layer = closer to external world (more volatile, I/O-bound).**
+
+Both layouts use this value — dagre places higher layers lower on screen, concentric places them at the center.
 
 **Reference mappings** (layer numbers in parentheses — adapt to actual project structure):
 
@@ -101,8 +100,7 @@ For each component, identify:
 **Connectivity check:** After mapping, verify every node has at least one edge. If a node is orphaned:
 - DTOs/entities → connect to the service or adapter that references them
 - External services → connect to the adapter/controller that integrates with them
-- Entities (model) → connect to the repository/adapter that references them
-- Database nodes → connect to the adapter/repository that queries them
+- Models → connect to the adapter/repository that queries them
 - Infrastructure nodes → connect to the adapter/service they provision
 
 ## Phase 6: Identify Use Cases
@@ -135,10 +133,90 @@ Only run this phase AFTER the developer has approved the draft in Phase 7.
 
 Create `.archrip/` directory if it doesn't exist, then write the complete `.archrip/architecture.json` following the schema, incorporating developer feedback.
 
-For the complete schema specification (field names, node/edge rules, layout selection), see [schema-reference.md](schema-reference.md).
-
 After writing the file:
-1. Run `npx archrip serve` in the terminal (auto-builds if needed, opens browser)
+1. Run `npx archrip serve` in the terminal — it auto-builds and opens the browser. **Do NOT run `npx archrip build` separately or open the browser manually** (serve handles everything).
 2. Tell the developer: Run `/archrip-update` to make further adjustments (add/remove nodes, fix relationships, etc.)
+
+### Required structure (use EXACTLY these field names)
+
+```json
+{
+  "version": "1.0",
+  "project": { "name": "...", "sourceUrl": "https://github.com/org/repo/blob/main/{filePath}" },
+  "nodes": [
+    { "id": "ctrl-users", "category": "controller", "label": "UsersController", "layer": 1, "filePath": "src/controllers/users.ts", "useCases": ["uc-user-mgmt"] }
+  ],
+  "edges": [
+    { "source": "ctrl-users", "target": "svc-users", "type": "dependency" }
+  ],
+  "useCases": [
+    { "id": "uc-user-mgmt", "name": "User Management", "nodeIds": ["ctrl-users", "svc-users"] }
+  ]
+}
+```
+
+**Critical field names — do NOT use alternatives:**
+- Node: `id`, `category`, `label` (NOT name), `layer` — all required
+- Edge: `source`, `target` (NOT from/to) — all required
+- UseCase: `id`, `name`, `nodeIds` — all required
+
+### Node Rules
+- `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, db-, infra-, ext-, job-, dto-)
+- `layer`: non-negative integer. **Higher = closer to domain core / more stable. Lower = closer to external world / more volatile.** Dagre (TB) places higher layers lower on screen; concentric places them at center. Use as many layers as the architecture requires (typically 3-6). Example for DDD/Hex: 0=external, 1=adapters (controllers + infra), 2=application core (use cases/app services + ports), 3=domain. Example for MVC: 0=external, 1=controllers, 2=services, 3=domain.
+- `category`: one of controller, service, port, adapter, model, database, infrastructure, external, job, dto (or custom). Use `model` for domain entities/value objects (core business logic). Use `database` for DB tables, migrations, ORMs. Use `infrastructure` for IaC resources (sst.config.ts, Terraform, Pulumi, CloudFormation, etc.)
+- `label`: display name for the node
+- `description`: 1-3 sentences explaining responsibility + business context. Do NOT just echo the label. Cross-reference documentation for richer context (see Description Guidelines below)
+- `filePath`: relative from project root
+- `useCases`: array of use case IDs this node participates in
+- `metadata` (optional): array of `{ label, value, type? }` entries for supplementary info (AWS ARNs, doc links, SLA notes, etc.). `type` is `text` (default), `code`, `link`, or `list`. `value` is a string, or `string[]` when `type` is `list`. Example:
+  ```json
+  "metadata": [
+    { "label": "Lambda ARN", "value": "arn:aws:lambda:ap-northeast-1:123:function:auth", "type": "code" },
+    { "label": "API Docs", "value": "https://docs.example.com/auth", "type": "link" },
+    { "label": "SLA", "value": ["99.9% uptime", "p95 < 200ms"], "type": "list" }
+  ]
+  ```
+
+### Edge Rules
+- `source`: source node id
+- `target`: target node id
+- `type`: dependency | implements | relation
+- `description` (optional): human-readable description of the edge's purpose
+- `metadata` (optional): same format as node metadata — array of `{ label, value, type? }` entries
+- Only include significant architectural dependencies (not utility imports)
+- **Every node MUST have at least one edge.** If a node has no obvious dependency, connect it with a `relation` edge to the component that uses or contains it.
+
+### Layout Selection
+- DDD / Clean Architecture / Hexagonal / Onion Architecture → add `"layout": "concentric"` to `project`
+- MVC / standard layered → `"layout": "dagre"` (default, can be omitted)
+
+### Description Guidelines
+
+#### Node `description`
+Write 1-3 sentences that explain responsibility AND business context.
+Cross-reference project documentation (README, CLAUDE.md, docs/) for richer context.
+- BAD: "User service" (just echoes the label)
+- BAD: "Handles users" (too vague)
+- GOOD: "Handles user registration, authentication, and profile management. Uses JWT for session tokens; password hashing via bcrypt. Rate-limited to 10 req/s per IP."
+
+#### Edge `description`
+Explain WHY the dependency exists, not just THAT it exists.
+- BAD: "calls" / "depends on"
+- GOOD: "Delegates payment processing via Stripe SDK; retries on timeout (3x with exponential backoff)"
+
+#### `metadata` for supplementary details
+Use `metadata` to capture information from docs that doesn't fit in `description`:
+```json
+"metadata": [
+  { "label": "SLA", "value": ["99.9% uptime", "p95 < 200ms"], "type": "list" },
+  { "label": "Design Doc", "value": "https://...", "type": "link" },
+  { "label": "Infrastructure", "value": "Lambda + DynamoDB (on-demand)", "type": "text" },
+  { "label": "Rate Limit", "value": "10 req/s per IP", "type": "text" }
+]
+```
+
+### Schema Rules
+- Include table schema only when migration files or model annotations are available
+- Reference from node data using schema key name
 
 $ARGUMENTS

@@ -24,13 +24,12 @@
 - UseCase: `id`, `name`, `nodeIds` — all required
 
 ## Node Rules
-- `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, db-, ext-, job-, dto-)
+- `id`: kebab-case, prefixed by category abbreviation (ctrl-, svc-, port-, adpt-, model-, db-, infra-, ext-, job-, dto-)
 - `layer`: non-negative integer. Higher = closer to domain core. See SKILL.md Phase 3 for framework-specific mappings
 - For Hexagonal/DDD: Ports are interfaces in the application core (often the same layer as use cases/app services); adapters implement them.
-- `category`: one of controller, service, port, adapter, model, database, external, job, dto (or custom). Use `model` for domain entities/value objects (core business logic). Use `database` for DB tables, migrations, ORMs, and infrastructure persistence.
+- `category`: one of controller, service, port, adapter, model, database, infrastructure, external, job, dto (or custom). Use `model` for domain entities/value objects (core business logic). Use `database` for DB tables, migrations, ORMs. Use `infrastructure` for IaC resources (sst.config.ts, Terraform, Pulumi, CloudFormation, etc.)
 - `label`: display name for the node
 - `filePath`: relative from project root
-- `depth` (optional): 0=overview (boundary), 1=structure (internal), 2=detail (implementation). Auto-inferred from category if omitted
 - `useCases`: array of use case IDs this node participates in
 
 ## Edge Rules
