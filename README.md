@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="archrip.jpg" alt="archrip" width="200">
+</p>
+
 # archrip
 
 Generate interactive architecture diagrams from your codebase using AI.
