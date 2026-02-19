@@ -54,8 +54,6 @@ The output is a standalone `dist/` folder you can deploy to GitHub Pages, Netlif
   "version": "1.0",
   "project": {
     "name": "My App",
-    "language": "TypeScript",
-    "framework": "Next.js",
     "sourceUrl": "https://github.com/org/repo/blob/main/{filePath}"
   },
   "nodes": [
@@ -63,13 +61,13 @@ The output is a standalone `dist/` folder you can deploy to GitHub Pages, Netlif
       "id": "ctrl-users",
       "category": "controller",
       "label": "UsersController",
-      "description": "User CRUD operations",
+      "description": "Handles user registration, authentication, and profile management. Uses JWT for session tokens with 24h expiry.",
       "filePath": "src/controllers/users.ts",
       "layer": 1,
-      "depth": 0,
-      "methods": ["list", "create", "update", "delete"],
-      "routes": ["GET /api/users", "POST /api/users"],
-      "useCases": ["uc-user-mgmt"]
+      "useCases": ["uc-user-mgmt"],
+      "metadata": [
+        { "label": "Rate Limit", "value": "10 req/s per IP", "type": "text" }
+      ]
     }
   ],
   "edges": [
@@ -79,19 +77,9 @@ The output is a standalone `dist/` folder you can deploy to GitHub Pages, Netlif
     {
       "id": "uc-user-mgmt",
       "name": "User Management",
-      "description": "CRUD operations for users",
       "nodeIds": ["ctrl-users", "svc-users", "model-user"]
     }
-  ],
-  "schemas": {
-    "users": {
-      "tableName": "users",
-      "columns": [
-        { "name": "id", "type": "BIGINT", "nullable": false, "index": "primary" },
-        { "name": "email", "type": "VARCHAR(255)", "nullable": false, "index": "unique" }
-      ]
-    }
-  }
+  ]
 }
 ```
 
@@ -103,27 +91,14 @@ The output is a standalone `dist/` folder you can deploy to GitHub Pages, Netlif
 | `service` | Green | Business logic (Service, UseCase) |
 | `port` | Purple | Abstractions (Interface, Contract, Port) |
 | `adapter` | Orange | Implementations (Repository impl, API client) |
-| `model` | Red | Data (Model, Entity, Schema) |
+| `model` | Red | Domain entities, value objects (core business logic) |
+| `database` | Amber | DB tables, migrations, ORMs |
+| `infrastructure` | Indigo | IaC resources (Terraform, Pulumi, sst.config.ts, CloudFormation) |
 | `external` | Gray | External services (API, DB, Queue) |
 | `job` | Yellow | Background (Job, Worker, Cron) |
 | `dto` | Cyan | Data transfer (DTO, Request, Response) |
 
 Custom categories are supported — they get a fallback color.
-
-### Depth (Abstraction Level)
-
-The optional `depth` field (0-2) controls which nodes appear at each abstraction level. If omitted, it is auto-inferred from the `layer` distribution:
-
-- **3+ unique layers**: lowest → 0 (overview), middle → 1 (structure), highest → 2 (detail)
-- **1-2 unique layers**: all nodes get depth 0 (always visible — depth filter has no effect)
-
-| Depth | Label | Shows |
-|-------|-------|-------|
-| 0 | Overview | Entry points, external boundaries (lowest layers) |
-| 1 | Structure | Core services, business logic (middle layers) |
-| 2 | Detail | Domain models, internal details (highest layers) |
-
-The viewer provides a 3-level toggle (Overview / Structure / Detail) to progressively reveal more nodes.
 
 ### Layers
 
@@ -169,10 +144,12 @@ archrip is framework-agnostic. The AI adapts its analysis based on the detected 
 ## Viewer Features
 
 - Interactive React Flow graph (drag, zoom, pan)
-- **Depth filter** — 3-level abstraction toggle (Overview / Structure / Detail)
 - **Use case filter** — highlight specific feature flows
-- Detail panel (click nodes for full info: routes, methods, source links, DB schema)
+- **Category filter** — show/hide by category
+- **Command palette** — keyboard-driven navigation (`Cmd+K`)
+- Detail panel (click nodes for full info: description, metadata, source links)
 - Color-coded categories with legend
+- Dark mode toggle
 - MiniMap navigation
 - Source code links (GitHub, GitLab, Backlog, or any hosting)
 

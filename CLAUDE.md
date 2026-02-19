@@ -24,7 +24,7 @@ npm run test -w packages/cli
 npm run test:watch -w packages/cli
 ```
 
-64テスト: `validate.spec.ts`(50) + `layout.spec.ts`(14)
+78テスト: `validate.spec.ts`(56) + `layout.spec.ts`(22)
 
 ## ローカルテスト
 
@@ -56,20 +56,19 @@ packages/
 │   ├── src/utils/       # validate, layout, detect-agents, paths, project-info, gitignore
 │   ├── src/install/     # viewer, slash-commands
 │   ├── src/schema/      # architecture.schema.json
-│   └── src/templates/   # skeleton.json, slash-commands/{claude,gemini,codex}/
+│   └── src/templates/   # skeleton.json, slash-commands/shared/ + {claude,gemini,codex}/
 └── viewer/       # React Flow ビューワー（build時に自動コピー）
-    ├── src/components/  # ArchNode, DepthFilter, UseCaseFilter, DetailPanel, Legend
-    ├── src/hooks/       # useArchitecture, useDepthFilter, useUseCaseFilter
+    ├── src/components/  # ArchNode, UseCaseFilter, DetailPanel, Legend, CommandPalette, ThemeToggle
+    ├── src/hooks/       # useArchitecture, useUseCaseFilter, useCategoryFilter, useCommandPalette, useKeyboardShortcuts, useFlowAnimation, useTheme
     └── src/data/        # loader.ts
 ```
 
 ## 設計判断
 
 - `layer`（整数）のみLLMが出力 → dagreが座標を自動計算（LLMに座標計算させない）
-- `depth`（0-2）: カテゴリから自動推定。Overview(0)/Structure(1)/Detail(2)の3段階抽象度フィルター
 - `sourceUrl`テンプレート: `{filePath}` プレースホルダーでGitHub/GitLab/Backlog等対応。http/httpsのみ許可
-- カスタムカテゴリ: 標準8種以外も使用可能（フォールバック色 stone が適用）
-- スラッシュコマンド: `init`時に`.claude/commands/`等にインストール。`$ARGUMENTS`プレースホルダー対応
+- 標準カテゴリ10種: controller, service, port, adapter, model, database, infrastructure, external, job, dto。カスタムカテゴリも使用可能（フォールバック色 stone が適用）
+- スラッシュコマンド: `init`時に`.claude/commands/`等にインストール。`shared/` + エージェント固有テンプレート。`$ARGUMENTS`プレースホルダー対応
 - ビューワーはスタンドアロン: ユーザーPJにコピーされるため、workspaceパッケージに依存不可
 
 ## セキュリティ
