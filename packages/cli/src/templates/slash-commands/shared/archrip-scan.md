@@ -48,7 +48,7 @@ MVC / Layered:
 - FastAPI: External(0) → Routers(1) → Services(2) → Repositories(3) → Domain(4)
 
 DDD / Clean Architecture / Hexagonal (use `"layout": "concentric"`):
-- Generic: External(0) → Adapters(1) [Controllers, DB impl, API clients] → Application Core(2) [Use Cases / Application Services, Ports] → Domain(3)
+- Generic: External(0) → Adapters(1) [Inbound (HTTP handlers, CLI), Outbound (DB impl, API clients)] → Application Core(2) [Use Cases / Application Services, Ports] → Domain(3)
 - Go (Hex): External(0) → Adapters(1) [Handlers, Repositories] → Application Core(2) [Use Cases, Ports] → Domain(3)
 - Flutter (Clean): External(0) → Data Sources(1) → Repositories(2) → Use Cases(3) → Domain(4)
 - Note: Ports are interfaces owned by the **application core** (use cases / application services; sometimes placed in domain, but not required). Adapters implement outbound Ports and call inbound Ports. For layering, Ports should be at the same layer as the application core (or 1 step closer to Domain), never at the adapter layer.
@@ -73,6 +73,7 @@ For each layer, read representative files to extract:
 - Dependencies (imports, injections)
 - Public methods/routes
 - Database schemas (from migrations or model definitions)
+- SQL queries / ORM operations (from repositories, DAOs, or query builders)
 
 **Enrich descriptions from documentation:** Cross-reference code with your Phase 2 notes.
 For each component, compose a `description` (1-3 sentences) that covers:
@@ -88,6 +89,7 @@ Also identify metadata candidates:
 - SLA/performance notes → `metadata` with `type: "list"`
 - Related doc links → `metadata` with `type: "link"`
 - Infrastructure details (Lambda ARN, DB engine, etc.) → `metadata` with `type: "code"` or `"text"`
+- SQL queries or ORM operations → edge `metadata` with `type: "code"` or `"list"` (see Phase 5)
 
 **Do NOT read every file.** Focus on entry points, core logic, interfaces, and data models.
 
@@ -100,8 +102,34 @@ For each component, identify:
 **Connectivity check:** After mapping, verify every node has at least one edge. If a node is orphaned:
 - DTOs/entities → connect to the service or adapter that references them
 - External services → connect to the adapter/controller that integrates with them
-- Models → connect to the adapter/repository that queries them
+- Entities (model) → connect to the repository/adapter that references them
+- Database nodes → connect to the adapter/repository that queries them
 - Infrastructure nodes → connect to the adapter/service they provision
+
+**Edge enrichment — SQL / query details:**
+For edges connecting a service/adapter/repository to a database or model node, include query information:
+- `description`: summarize what data operation this edge performs (e.g., "Queries active users by email with JOIN on roles")
+- `metadata`: include representative SQL or ORM queries found in the source code
+
+Example:
+```json
+{
+  "source": "adpt-user-repo",
+  "target": "db-users",
+  "type": "dependency",
+  "description": "CRUD operations on users table; filters by email and status with role JOIN",
+  "metadata": [
+    { "label": "Queries", "value": ["SELECT u.*, r.name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.email = ?", "INSERT INTO users (name, email, role_id) VALUES (?, ?, ?)"], "type": "list" },
+    { "label": "ORM", "value": "User::with('role')->where('email', $email)->first()", "type": "code" }
+  ]
+}
+```
+
+Guidelines:
+- Include the most representative 2-3 queries (not every query)
+- For ORMs (Eloquent, Drizzle, Prisma, etc.), use `type: "code"` with the ORM syntax
+- For raw SQL, use `type: "list"` with individual queries
+- Parameterize values (use `?` or `:param` placeholders, not literals)
 
 ## Phase 6: Identify Use Cases
 Group related components into user-facing features.

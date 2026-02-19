@@ -36,6 +36,8 @@
 - `source`: source node id
 - `target`: target node id
 - `type`: dependency | implements | relation
+- `description` (optional): human-readable description of the edge's purpose
+- `metadata` (optional): same format as node metadata — array of `{ label, value, type? }` entries. Use for SQL/query details on DB edges (see examples below)
 - Only include significant architectural dependencies (not utility imports)
 - **Every node MUST have at least one edge.** If a node has no obvious dependency, connect it with a `relation` edge to the component that uses or contains it.
 
@@ -64,7 +66,8 @@ Use `metadata` to capture information from docs that doesn't fit in `description
   { "label": "SLA", "value": ["99.9% uptime", "p95 < 200ms"], "type": "list" },
   { "label": "Design Doc", "value": "https://...", "type": "link" },
   { "label": "Infrastructure", "value": "Lambda + DynamoDB (on-demand)", "type": "text" },
-  { "label": "Rate Limit", "value": "10 req/s per IP", "type": "text" }
+  { "label": "Rate Limit", "value": "10 req/s per IP", "type": "text" },
+  { "label": "Queries", "value": ["SELECT * FROM users WHERE email = ?", "INSERT INTO users (name, email) VALUES (?, ?)"], "type": "list" }
 ]
 ```
 
