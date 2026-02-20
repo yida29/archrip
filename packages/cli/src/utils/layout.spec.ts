@@ -326,18 +326,20 @@ describe('computeLayout (concentric)', () => {
     expect(dist(adptNode)).toBeLessThan(dist(extNode));
   });
 
-  it('should place ports between services and adapters (Port & Adapter pattern)', () => {
+  it('should place ports and adapters on adjacent rings (Port & Adapter pattern)', () => {
     const data = makeData({
       project: { name: 'test', layout: 'concentric' },
       nodes: [
         { id: 'entity', category: 'entity', label: 'Entity', layer: 5 },
         { id: 'svc', category: 'service', label: 'Service', layer: 2 },
         { id: 'port', category: 'port', label: 'Port', layer: 3 },
-        { id: 'adpt', category: 'adapter', label: 'Adapter', layer: 4 },
+        { id: 'ctrl', category: 'controller', label: 'Controller', layer: 3 },
+        { id: 'adpt', category: 'adapter', label: 'Adapter', layer: 3 },
       ],
       edges: [
         { source: 'svc', target: 'port' },
         { source: 'adpt', target: 'port' },
+        { source: 'ctrl', target: 'svc' },
         { source: 'port', target: 'entity' },
       ],
     });
@@ -351,11 +353,15 @@ describe('computeLayout (concentric)', () => {
 
     const svcNode = result.nodes.find((n) => n.id === 'svc')!;
     const portNode = result.nodes.find((n) => n.id === 'port')!;
+    const ctrlNode = result.nodes.find((n) => n.id === 'ctrl')!;
     const adptNode = result.nodes.find((n) => n.id === 'adpt')!;
 
     // Port should be between service and adapter
     expect(dist(svcNode)).toBeLessThan(dist(portNode));
     expect(dist(portNode)).toBeLessThan(dist(adptNode));
+
+    // Controller and adapter should be on the same ring (same priority 3)
+    expect(dist(ctrlNode)).toBeCloseTo(dist(adptNode), 1);
   });
 
   it('should enforce monotonically increasing ring radii even when inner rings have more nodes', () => {

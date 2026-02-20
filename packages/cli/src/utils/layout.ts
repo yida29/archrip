@@ -128,18 +128,19 @@ function circularMean(angles: number[]): number {
  */
 const CATEGORY_RING_PRIORITY: Record<string, number> = {
   entity: 0,
+  model: 0,
   service: 1,
   dto: 2,
-  port: 3,
-  controller: 4,
-  adapter: 5,
-  database: 6,
-  infrastructure: 7,
-  job: 8,
-  external: 9,
+  port: 2,
+  controller: 3,
+  adapter: 3,
+  database: 4,
+  infrastructure: 5,
+  job: 5,
+  external: 6,
 };
 
-const DEFAULT_RING_PRIORITY = 4; // unknown categories treated as controller-level
+const DEFAULT_RING_PRIORITY = 3; // unknown categories treated as controller-level
 
 /**
  * Compute the ring key for a node. Combines category priority (primary)
