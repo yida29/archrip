@@ -35,6 +35,14 @@ If `$ARGUMENTS` is provided, apply the user's requested changes:
 
 Write the updated `.archrip/architecture.json`.
 
+## Schema constraints (apply on every write)
+
+When adding or splitting nodes, follow the same rules as the scan skill:
+
+- **One node per real component.** Avoid umbrella nodes that bundle siblings — each Controller, UseCase, abstract Repository, Repository implementation, and Domain Entity is normally its own node. See [archrip-scan/schema-reference.md → Node Granularity](../archrip-scan/schema-reference.md#node-granularity-avoid-over-collapsing).
+- **Repository → Port pattern (DDD/Hex).** Every abstract Repository becomes a `port` node in the application core; every implementation becomes an `adapter` node that `implements` the port. Use cases depend on the port, not the adapter. See [archrip-scan/schema-reference.md → Repository → Port pattern](../archrip-scan/schema-reference.md#repository--port-pattern-ddd--hexagonal).
+- **`implements` edges flow `adapter → port`.** Never point them at entities, adapters, or databases — that signals a missing port abstraction. See [archrip-scan/schema-reference.md → Edge type semantics](../archrip-scan/schema-reference.md#edge-type-semantics).
+
 ## After Update
 
 After writing the file, run `npx archrip serve` in the terminal to rebuild and preview the updated diagram.

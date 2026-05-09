@@ -76,6 +76,10 @@ For each layer, read representative files to extract:
 - Database schemas (from migrations or entity definitions)
 - SQL queries / ORM operations (from repositories, DAOs, or query builders)
 
+**Granularity: one node per real component.** Resist the urge to bundle siblings into umbrella nodes (e.g. a single `domain-shared-models` covering 9 entities, or one `adpt-shared-repos` for every repository implementation). Each Controller, UseCase, abstract Repository, Repository implementation, and Domain Entity is normally its own node. See [schema-reference.md → Node Granularity](schema-reference.md#node-granularity-avoid-over-collapsing) for the exact rule of thumb.
+
+**Repository → Port pattern:** in DDD/Hexagonal projects, every abstract Repository in `domains/` becomes a `port` node (layer = application core), and every concrete implementation in `infrastructures/` becomes an `adapter` node (outer layer). The use case depends on the port; the adapter `implements` the port. See [schema-reference.md → Repository → Port pattern](schema-reference.md#repository--port-pattern-ddd--hexagonal) for the canonical shape.
+
 **Enrich descriptions from documentation:** Cross-reference code with your Phase 2 notes.
 For each component, compose a `description` (1-3 sentences) that covers:
 - **What**: Its responsibility (from code analysis)
@@ -99,6 +103,8 @@ For each component, identify:
 - What it depends on (imports, constructor injection)
 - What depends on it
 - External service connections
+
+**Edge type matters.** `dependency` / `implements` / `relation` are not interchangeable. In particular, `implements` edges always flow `adapter → port` — never adapter → entity, adapter → adapter, or adapter → database. If you cannot point an `implements` edge at a `port` node, the abstraction is missing from the diagram and should be added. See [schema-reference.md → Edge type semantics](schema-reference.md#edge-type-semantics).
 
 **Connectivity check:** After mapping, verify every node has at least one edge. If a node is orphaned:
 - DTOs/entities → connect to the service or adapter that references them
