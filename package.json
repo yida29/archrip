@@ -16,6 +16,6 @@
     "node": ">=20"
   },
   "devDependencies": {
-    "knip": "^5.83.1"
+    "knip": "^6.0.0"
   }
 }
