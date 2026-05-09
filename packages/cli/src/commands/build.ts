@@ -42,7 +42,14 @@ function execSyncWithOutput(command: string, cwd: string): void {
 
 function runViewerBuild(viewerDir: string, distDir: string): void {
   console.log('Installing viewer dependencies...');
-  execSyncWithOutput('npm ci --ignore-scripts', viewerDir);
+  // Prefer reproducible installs when a lockfile is available; fall back to
+  // `npm install` on first run (the bundled viewer template does not ship a
+  // lockfile because it lives inside an npm workspace in the source repo).
+  const hasLockfile = existsSync(join(viewerDir, 'package-lock.json'));
+  const installCmd = hasLockfile
+    ? 'npm ci --ignore-scripts'
+    : 'npm install --ignore-scripts --no-audit --no-fund';
+  execSyncWithOutput(installCmd, viewerDir);
 
   console.log('Building viewer...');
   execSyncWithOutput('npm run build', viewerDir);
